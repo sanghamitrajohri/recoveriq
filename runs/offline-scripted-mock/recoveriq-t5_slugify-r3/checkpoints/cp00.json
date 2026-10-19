@@ -1,0 +1,12 @@
+{
+  "checkpoint_id": "cp00",
+  "label": "initial task state",
+  "known_good": true,
+  "created_at": 1792449800.267522,
+  "passed_tests": 0,
+  "manifest": {
+    "slugify.py": "37971e58bb6d69027ac46e2b5eeb5d58aebc42ca037f660e6dd4b57b5ed40f63",
+    "test_acceptance_slugify.py": "eceb23de58d337e4aac13e9776d250c45e4e1321684fedc5bf4c23b67e418bbe",
+    "test_slugify.py": "cd44064325af22ee1d3b9e6f716a9809a9220a72b1353e90af868bb5e31dfd76"
+  }
+}

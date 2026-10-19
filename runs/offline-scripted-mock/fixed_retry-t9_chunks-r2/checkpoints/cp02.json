@@ -1,0 +1,12 @@
+{
+  "checkpoint_id": "cp02",
+  "label": "after attempt 4",
+  "known_good": true,
+  "created_at": 1792449784.306027,
+  "passed_tests": 4,
+  "manifest": {
+    "chunks.py": "f22034ba102c1cf3d3979fefa1820b44c6525e03a757d693a9e66e3b7167ecd4",
+    "test_acceptance_chunks.py": "6fe0d585d99806c71b431f9d84d463b380df1389e14c8681b0594d93161d26a9",
+    "test_chunks.py": "ce2df0643feb4f7beba1f99af8b3e6fa1273b848f57eb1cef737a3dad96cc587"
+  }
+}

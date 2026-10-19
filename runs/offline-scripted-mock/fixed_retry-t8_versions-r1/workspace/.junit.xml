@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="5" time="0.024" timestamp="2026-10-19T15:42:32.094872-07:00" hostname="Sanghamitras-MacBook-Air.local"><testcase classname="test_acceptance_versions" name="test_acceptance_major" file="test_acceptance_versions.py" line="3" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = is_newer('10.0.0', '9.99.99')">test_acceptance_versions.py:5: in test_acceptance_major
+    assert is_newer("10.0.0", "9.99.99")
+E   AssertionError: assert False
+E    +  where False = is_newer('10.0.0', '9.99.99')</failure></testcase><testcase classname="test_versions" name="test_simple" file="test_versions.py" line="3" time="0.000" /><testcase classname="test_versions" name="test_multi_digit_component" file="test_versions.py" line="7" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = is_newer('1.10.0', '1.9.3')">test_versions.py:9: in test_multi_digit_component
+    assert is_newer("1.10.0", "1.9.3")
+E   AssertionError: assert False
+E    +  where False = is_newer('1.10.0', '1.9.3')</failure></testcase><testcase classname="test_versions" name="test_missing_patch_component" file="test_versions.py" line="11" time="0.000" /><testcase classname="test_versions" name="test_equal" file="test_versions.py" line="15" time="0.000" /></testsuite></testsuites>

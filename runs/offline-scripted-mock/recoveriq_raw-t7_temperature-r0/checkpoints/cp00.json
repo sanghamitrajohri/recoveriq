@@ -1,0 +1,13 @@
+{
+  "checkpoint_id": "cp00",
+  "label": "initial task state",
+  "known_good": true,
+  "created_at": 1792449719.242375,
+  "passed_tests": 0,
+  "manifest": {
+    "constants.py": "1bbd62ac67087a6293c32884bf1ab13a6557b5fa41048bc877c5afdb87b06f45",
+    "convert.py": "8a2b689961b64a083d9bc86d45b10c0fd973e56be252d41d3d939c566b1f95e4",
+    "test_acceptance_convert.py": "dd6c56e34fe743d28c0513c2109a2261c9c9514f155c71902f6d06d7182596ba",
+    "test_convert.py": "cfb1ed2bed6289593cb7677b34b5332c918bad49e0aaeed521a578f5ab486668"
+  }
+}

@@ -4,9 +4,6 @@ __pycache__/
 .env
 .env.*
 !.env.example
-runs/
-results/*
-!results/README.md
 .pytest_cache/
 .DS_Store
 # Live benchmark evidence is committed (no secrets; checked before commit).

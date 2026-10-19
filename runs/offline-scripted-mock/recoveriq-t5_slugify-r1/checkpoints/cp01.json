@@ -1,0 +1,12 @@
+{
+  "checkpoint_id": "cp01",
+  "label": "after attempt 1",
+  "known_good": true,
+  "created_at": 1792449743.3275251,
+  "passed_tests": 3,
+  "manifest": {
+    "slugify.py": "e9d634bf5dc2118014188cad1ea2c46fdbddebe027243bbc5e5500ac0e0cfda4",
+    "test_acceptance_slugify.py": "eceb23de58d337e4aac13e9776d250c45e4e1321684fedc5bf4c23b67e418bbe",
+    "test_slugify.py": "cd44064325af22ee1d3b9e6f716a9809a9220a72b1353e90af868bb5e31dfd76"
+  }
+}

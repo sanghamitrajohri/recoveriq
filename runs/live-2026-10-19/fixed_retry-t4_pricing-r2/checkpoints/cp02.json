@@ -1,0 +1,12 @@
+{
+  "checkpoint_id": "cp02",
+  "label": "after attempt 3",
+  "known_good": true,
+  "created_at": 1792451072.828049,
+  "passed_tests": 4,
+  "manifest": {
+    "pricing.py": "102cb56dd133c72dc2ba7913caf8c6c508402f5009e3c9e18491eaa6be203e76",
+    "test_acceptance_pricing.py": "615d53595d76a4850b90bd682c8675276f928af42afff92646bac97c83b2051d",
+    "test_pricing.py": "44e40a2539565f72610852123dd9d83a05f96f642de462f48525be2423ed69bd"
+  }
+}

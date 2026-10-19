@@ -1,0 +1,15 @@
+"""Invoice pricing helpers."""
+from decimal import ROUND_HALF_UP, Decimal
+
+_CENT = Decimal("0.01")
+
+
+def line_total(unit_price, quantity, discount_pct=0):
+    """Total for one invoice line after a percentage discount, rounded to cents."""
+    if quantity < 0:
+        raise ValueError("quantity must be non-negative")
+    if not 0 <= discount_pct <= 100:
+        raise ValueError("discount_pct must be between 0 and 100")
+    gross = Decimal(str(unit_price)) * quantity
+    net = gross * (Decimal(100) - Decimal(str(discount_pct))) / Decimal(100)
+    return net.quantize(_CENT, rounding=ROUND_HALF_UP)

@@ -1,0 +1,12 @@
+{
+  "checkpoint_id": "cp00",
+  "label": "initial task state",
+  "known_good": true,
+  "created_at": 1792450096.7496982,
+  "passed_tests": 0,
+  "manifest": {
+    "test_acceptance_wordfreq.py": "1fa00d312409efb644fba506d03cc483cdf74df63b71cb584d5ce4a05d425cc4",
+    "test_wordfreq.py": "d9c822106d7e8622ec94d95fb526e744356a64ca67ca2d0fb59269b35af0296d",
+    "wordfreq.py": "cfd30498bfa3563440e0e1642bd99b48078539f14d239cc27a68cc8a95ffdf38"
+  }
+}

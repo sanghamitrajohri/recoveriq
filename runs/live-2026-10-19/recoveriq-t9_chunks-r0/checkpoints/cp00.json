@@ -1,0 +1,12 @@
+{
+  "checkpoint_id": "cp00",
+  "label": "initial task state",
+  "known_good": true,
+  "created_at": 1792450258.777579,
+  "passed_tests": 0,
+  "manifest": {
+    "chunks.py": "3828c8b7bf6cdc333f83cb9c695127fecde68d5c01cfd6b75665dbd7a79fc43d",
+    "test_acceptance_chunks.py": "6fe0d585d99806c71b431f9d84d463b380df1389e14c8681b0594d93161d26a9",
+    "test_chunks.py": "ce2df0643feb4f7beba1f99af8b3e6fa1273b848f57eb1cef737a3dad96cc587"
+  }
+}

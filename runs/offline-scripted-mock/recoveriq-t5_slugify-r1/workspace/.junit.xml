@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="4" time="0.025" timestamp="2026-10-19T15:42:23.577614-07:00" hostname="Sanghamitras-MacBook-Air.local"><testcase classname="test_acceptance_slugify" name="test_acceptance_punctuation" file="test_acceptance_slugify.py" line="3" time="0.000" /><testcase classname="test_slugify" name="test_basic" file="test_slugify.py" line="3" time="0.000" /><testcase classname="test_slugify" name="test_underscores_become_hyphens" file="test_slugify.py" line="7" time="0.000"><failure message="AssertionError: assert 'snake_case-title' == 'snake-case-title'&#10;  &#10;  - snake-case-title&#10;  ?      ^&#10;  + snake_case-title&#10;  ?      ^">test_slugify.py:9: in test_underscores_become_hyphens
+    assert slugify("snake_case title") == "snake-case-title"
+E   AssertionError: assert 'snake_case-title' == 'snake-case-title'
+E     
+E     - snake-case-title
+E     ?      ^
+E     + snake_case-title
+E     ?      ^</failure></testcase><testcase classname="test_slugify" name="test_underscores_are_preserved" file="test_slugify.py" line="11" time="0.000" /></testsuite></testsuites>

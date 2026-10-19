@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="2" failures="0" skipped="0" tests="2" time="0.096" timestamp="2026-10-19T15:43:40.031464-07:00" hostname="Sanghamitras-MacBook-Air.local"><testcase classname="" name="test_acceptance_duration" file="test_acceptance_duration.py" time="0.000"><error message="collection failure">../../../../.venv/lib/python3.11/site-packages/_pytest/python.py:508: in importtestmodule
+    mod = import_path(
+../../../../.venv/lib/python3.11/site-packages/_pytest/pathlib.py:596: in import_path
+    importlib.import_module(module_name)
+/opt/homebrew/Cellar/python@3.11/3.11.14_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1204: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1176: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1147: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:690: in _load_unlocked
+    ???
+../../../../.venv/lib/python3.11/site-packages/_pytest/assertion/rewrite.py:188: in exec_module
+    exec(co, module.__dict__)
+test_acceptance_duration.py:1: in &lt;module&gt;
+    from duration import parse_duration
+duration.py:4: in &lt;module&gt;
+    from units import SECONDS_PER_DAY, SECONDS_PER_HOUR, SECONDS_PER_MINUTE
+E     File "/Users/sanghamitrajohri/Desktop/recoveriq/runs/offline-scripted-mock/fixed_retry-t2_duration-r4/workspace/units.py", line 2
+E       SECONDS_PER_HOUR = (
+E                          ^
+E   SyntaxError: '(' was never closed</error></testcase><testcase classname="" name="test_duration" file="test_duration.py" time="0.000"><error message="collection failure">../../../../.venv/lib/python3.11/site-packages/_pytest/python.py:508: in importtestmodule
+    mod = import_path(
+../../../../.venv/lib/python3.11/site-packages/_pytest/pathlib.py:596: in import_path
+    importlib.import_module(module_name)
+/opt/homebrew/Cellar/python@3.11/3.11.14_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1204: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1176: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1147: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:690: in _load_unlocked
+    ???
+../../../../.venv/lib/python3.11/site-packages/_pytest/assertion/rewrite.py:188: in exec_module
+    exec(co, module.__dict__)
+test_duration.py:3: in &lt;module&gt;
+    from duration import parse_duration
+duration.py:4: in &lt;module&gt;
+    from units import SECONDS_PER_DAY, SECONDS_PER_HOUR, SECONDS_PER_MINUTE
+E     File "/Users/sanghamitrajohri/Desktop/recoveriq/runs/offline-scripted-mock/fixed_retry-t2_duration-r4/workspace/units.py", line 2
+E       SECONDS_PER_HOUR = (
+E                          ^
+E   SyntaxError: '(' was never closed</error></testcase></testsuite></testsuites>

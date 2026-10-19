@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="5" time="0.026" timestamp="2026-10-19T15:43:15.142724-07:00" hostname="Sanghamitras-MacBook-Air.local"><testcase classname="test_acceptance_pricing" name="test_acceptance_policy_a" file="test_acceptance_pricing.py" line="5" time="0.000"><failure message="AssertionError: assert Decimal('0.00') == Decimal('1.01')&#10; +  where Decimal('0.00') = line_total(Decimal('1.005'), 1)&#10; +    where Decimal('1.005') = Decimal('1.005')&#10; +  and   Decimal('1.01') = Decimal('1.01')">test_acceptance_pricing.py:7: in test_acceptance_policy_a
+    assert line_total(Decimal("1.005"), 1) == Decimal("1.01")
+E   AssertionError: assert Decimal('0.00') == Decimal('1.01')
+E    +  where Decimal('0.00') = line_total(Decimal('1.005'), 1)
+E    +    where Decimal('1.005') = Decimal('1.005')
+E    +  and   Decimal('1.01') = Decimal('1.01')</failure></testcase><testcase classname="test_acceptance_pricing" name="test_acceptance_policy_b" file="test_acceptance_pricing.py" line="9" time="0.000"><failure message="AssertionError: assert (True and Decimal('9.00') == Decimal('50.97'))&#10; +  where True = isinstance(Decimal('9.00'), Decimal)&#10; +  and   Decimal('50.97') = Decimal('50.97')">test_acceptance_pricing.py:12: in test_acceptance_policy_b
+    assert isinstance(result, Decimal) and result == Decimal("50.97")
+E   AssertionError: assert (True and Decimal('9.00') == Decimal('50.97'))
+E    +  where True = isinstance(Decimal('9.00'), Decimal)
+E    +  and   Decimal('50.97') = Decimal('50.97')</failure></testcase><testcase classname="test_pricing" name="test_no_discount" file="test_pricing.py" line="5" time="0.000"><failure message="assert 0.0 == 30&#10; +  where 0.0 = line_total(10, 3)">test_pricing.py:7: in test_no_discount
+    assert line_total(10, 3) == 30
+E   assert 0.0 == 30
+E    +  where 0.0 = line_total(10, 3)</failure></testcase><testcase classname="test_pricing" name="test_ten_percent_discount" file="test_pricing.py" line="9" time="0.000"><failure message="assert 3.0 == 27&#10; +  where 3.0 = line_total(10, 3, 10)">test_pricing.py:11: in test_ten_percent_discount
+    assert line_total(10, 3, 10) == 27
+E   assert 3.0 == 27
+E    +  where 3.0 = line_total(10, 3, 10)</failure></testcase><testcase classname="test_pricing" name="test_invalid_discount" file="test_pricing.py" line="13" time="0.000" /></testsuite></testsuites>

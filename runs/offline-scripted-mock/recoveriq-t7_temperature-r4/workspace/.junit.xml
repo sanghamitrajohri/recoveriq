@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="0.025" timestamp="2026-10-19T15:43:55.380481-07:00" hostname="Sanghamitras-MacBook-Air.local"><testcase classname="test_acceptance_convert" name="test_acceptance_constants_intact" file="test_acceptance_convert.py" line="6" time="0.000"><failure message="assert 1.6 == 1.8&#10; +  where 1.6 = constants.F_PER_C">test_acceptance_convert.py:8: in test_acceptance_constants_intact
+    assert constants.F_PER_C == 1.8
+E   assert 1.6 == 1.8
+E    +  where 1.6 = constants.F_PER_C</failure></testcase><testcase classname="test_acceptance_convert" name="test_acceptance_body_temperature" file="test_acceptance_convert.py" line="10" time="0.000"><failure message="assert 91.2 == 98.6 ± 9.9e-05&#10;  &#10;  comparison failed&#10;  Obtained: 91.2&#10;  Expected: 98.6 ± 9.9e-05">test_acceptance_convert.py:12: in test_acceptance_body_temperature
+    assert to_fahrenheit(37) == pytest.approx(98.6)
+E   assert 91.2 == 98.6 ± 9.9e-05
+E     
+E     comparison failed
+E     Obtained: 91.2
+E     Expected: 98.6 ± 9.9e-05</failure></testcase><testcase classname="test_convert" name="test_fahrenheit_boiling" file="test_convert.py" line="5" time="0.000"><failure message="assert 192.0 == 212.0 ± 2.1e-04&#10;  &#10;  comparison failed&#10;  Obtained: 192.0&#10;  Expected: 212.0 ± 2.1e-04">test_convert.py:7: in test_fahrenheit_boiling
+    assert to_fahrenheit(100) == pytest.approx(212.0)
+E   assert 192.0 == 212.0 ± 2.1e-04
+E     
+E     comparison failed
+E     Obtained: 192.0
+E     Expected: 212.0 ± 2.1e-04</failure></testcase><testcase classname="test_convert" name="test_kelvin_freezing" file="test_convert.py" line="9" time="0.000"><failure message="assert 273 == 273.15 ± 2.7e-04&#10;  &#10;  comparison failed&#10;  Obtained: 273&#10;  Expected: 273.15 ± 2.7e-04">test_convert.py:11: in test_kelvin_freezing
+    assert to_kelvin(0) == pytest.approx(273.15)
+E   assert 273 == 273.15 ± 2.7e-04
+E     
+E     comparison failed
+E     Obtained: 273
+E     Expected: 273.15 ± 2.7e-04</failure></testcase></testsuite></testsuites>
