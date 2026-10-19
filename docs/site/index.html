@@ -111,6 +111,18 @@ th.n { text-align: right; }
 .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 8px; vertical-align: 0; }
 .sw.riq { background: var(--riq); } .sw.rule { background: var(--rule-c); } .sw.fixed { background: var(--fixed); } .sw.raw { background: var(--raw); }
 
+/* plain-words story */
+.story { display: grid; gap: 20px; background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 28px; }
+.story p { font-size: 1.05rem; }
+.story .kicker { font: 600 1.25rem/1.3 var(--display); }
+.oops { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.oops > div { display: grid; gap: 6px; align-content: start; background: var(--soft); border-radius: 10px; padding: 14px; }
+.oops b { font: 600 0.98rem/1.3 var(--display); }
+.oops .do { font: 500 0.78rem/1.4 var(--mono); color: var(--riq); text-transform: uppercase; letter-spacing: 0.04em; }
+.oops span { font-size: 0.9rem; color: var(--muted); }
+@media (max-width: 900px) { .oops { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .oops { grid-template-columns: 1fr; } }
+
 /* findings */
 .findings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 32px; }
 .finding { display: grid; gap: 8px; align-content: start; }
@@ -136,6 +148,47 @@ footer { color: var(--muted); font-size: 0.88rem; border-top: 1px solid var(--ru
     <div class="stat"><b>108 runs</b><span>real Claude and real Jev calls, $2.41 in total. Every number recomputes from the raw logs.</span></div>
   </div>
 </header>
+
+<!-- PLAIN WORDS -->
+<section aria-labelledby="plain">
+  <div class="eyebrow">In plain words</div>
+  <h2 id="plain">A robot baker, a salty cake, and a manager who thinks first</h2>
+  <div class="story">
+    <p>Imagine you run a bakery with a robot baker. You hand it a recipe, it bakes a cake, and a taster checks whether the cake is right. Every cake costs money for ingredients and oven time. Sometimes the cake comes out wrong.</p>
+    <p>The simplest bakery has one rule for a bad cake: <strong>bake it again</strong>. Now picture what happens when somebody has secretly swapped the sugar jar for salt. The robot bakes again, and the cake is salty. Again, salty. Five cakes later the bakery has spent five times the money and still has no cake, because baking again never fixes a jar of salt.</p>
+    <p class="kicker">A bad cake can have very different causes, and each one has a different cheap fix.</p>
+    <div class="oops">
+      <div><b>The oven tripped the fuse for a second</b><div class="do">→ just bake again</div><span>The only case where "again" is the right answer.</span></div>
+      <div><b>The recipe was too long for the robot's tiny notepad</b><div class="do">→ send a bigger robot</div><span>It copied half the recipe. Retrying copies the same half.</span></div>
+      <div><b>Someone swapped the sugar for salt</b><div class="do">→ put the pantry back</div><span>Use the photo of how the pantry looked this morning.</span></div>
+      <div><b>The customer wanted it gluten-free but never said so</b><div class="do">→ ask the customer</div><span>No robot can guess a wish nobody wrote down.</span></div>
+      <div><b>The order says "all chocolate" and "all vanilla"</b><div class="do">→ stop and send it back</div><span>No cake can be both. Every attempt is wasted money.</span></div>
+    </div>
+    <p>RecoverIQ adds a <strong>kitchen manager</strong> who looks at each bad cake, glances at the pantry, and picks one of those five moves. The manager's opinion is nearly free: about a two-hundredth of a cent and a tenth of a second. Baking another cake with the big robot costs about eight cents. A strict <strong>accountant</strong> stands next to the manager and can veto any move the bakery can't afford.</p>
+    <p>One more twist from our real runs: given the impossible "all chocolate and all vanilla" order, the big robot <strong>stuck a label on the box that fooled the taster</strong> into ticking both boxes. The cake was still wrong. So we added an inspector who opens the box before we count a cake as done.</p>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>In the kitchen</th><th>In RecoverIQ</th></tr></thead>
+      <tbody>
+        <tr><td>Robot baker</td><td>The <strong>coding agent</strong>: Claude writes a fix for a buggy Python file</td></tr>
+        <tr><td>Small robot / big robot</td><td><strong>Claude Haiku 4.5</strong> (cheap, 1,024-token output limit) / <strong>Claude Opus 5</strong> (capable, about 10× the cost per attempt)</td></tr>
+        <tr><td>The taster</td><td>The <strong>unit tests</strong> (pytest), run inside a locked-down sandbox</td></tr>
+        <tr><td>A secret taster the robot never meets</td><td><strong>Hidden acceptance tests</strong> the agent never sees</td></tr>
+        <tr><td>The pantry</td><td>The <strong>workspace</strong>: the project's files</td></tr>
+        <tr><td>This morning's photo of the pantry</td><td>A <strong>checkpoint</strong>: a file snapshot, verified by hash when restored</td></tr>
+        <tr><td>Fuse trips for a second</td><td>A <strong>transient API error</strong> (the provider says "overloaded")</td></tr>
+        <tr><td>Tiny notepad</td><td>The model's <strong>output-token limit</strong>, which truncates long answers</td></tr>
+        <tr><td>The kitchen manager</td><td><strong>Jev</strong>, TypeSafe's decision model: it answers typed questions with probabilities</td></tr>
+        <tr><td>The accountant's veto</td><td>The <strong>recovery policy</strong>: budget, attempt and time limits in plain code</td></tr>
+        <tr><td>Label that fooled the taster</td><td><strong>Reward hacking</strong>: the model overrode string equality so contradictory tests passed</td></tr>
+        <tr><td>The inspector who opens the box</td><td>The <strong>integrity audit</strong>: only clean fixes count</td></tr>
+        <tr><td>Cakes per dollar</td><td><strong>Clean fixes per dollar</strong>, the number this project measures</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">The rest of this page uses the real terms. The live race below is the salt-in-the-sugar-jar case: a helper file was quietly changed.</p>
+</section>
 
 <!-- RACE -->
 <section aria-labelledby="race">

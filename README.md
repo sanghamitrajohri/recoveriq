@@ -5,6 +5,22 @@ When a coding agent fails, RecoverIQ decides what to do next — **retry**, **sw
 [Jev](https://docs.typesafe.ai) decision model, with deterministic budget and safety rules
 that Jev cannot override.
 
+**🌐 Project page:** https://sanghamitrajohri.github.io/recoveriq/
+
+### In plain words
+
+Imagine a robot baker whose cakes are checked by a taster. When a cake comes out wrong, the
+simplest bakery just bakes again. But if someone swapped the sugar jar for salt, every new cake
+is salty too, and you pay for each one. A bad cake can have different causes with different
+cheap fixes: bake again (the oven blipped), send a bigger robot (the recipe was too long for
+the small one's notepad), put the pantry back from this morning's photo (sugar swapped for
+salt), ask the customer (an unwritten wish), or stop (an impossible order). RecoverIQ adds a
+kitchen manager (**Jev**) who picks the right move for a fraction of a cent, and an accountant
+(the **policy**) who vetoes anything the bakery can't afford.
+
+In real terms: the baker is a Claude coding agent, the taster is pytest, the pantry is the
+workspace, the photo is a checkpoint, and "cakes per dollar" is **clean fixes per dollar**.
+
 **Research question:** does Jev-guided recovery deliver more *verified* successful task
 completions per dollar than fixed retry or hand-written recovery rules?
 

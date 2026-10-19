@@ -10,12 +10,13 @@ $0.15, so rehearsing 5 times costs well under $1.
 
 ---
 
-### 0:00–0:20 — The problem
-> "Coding agents fail constantly. The default fix is *retry*: same model, same prompt, pay
-> again. Sometimes that works. Often the right move is a bigger model, rolling back the
-> workspace, asking a human, or just stopping. RecoverIQ makes that call with **Jev**,
-> TypeSafe's decision model. It answers typed questions with probabilities, not prose, and a
-> plain-code budget policy sits on top that Jev can't override."
+### 0:00–0:20 — The problem (start with the cake)
+> "Picture a robot baker. A cake comes out wrong, so it bakes again. But someone swapped the
+> sugar for salt, so every cake is salty, and you pay for each one. That's how most AI coding
+> agents recover from failure: retry and hope. RecoverIQ adds a kitchen manager, TypeSafe's
+> **Jev**, who looks at the failure and picks the right fix: bake again, use a bigger robot,
+> restore the pantry, ask the customer, or stop. An accountant written in plain code vetoes
+> anything we can't afford. Let me show you the salt-in-the-sugar case, live."
 
 ### 0:20–1:05 — LIVE: the race (`t7_temperature`, 🏁 Live race tab)
 Sidebar → **t7_temperature · silent_corruption** → **🏁 Live race** tab → **Start race**.
