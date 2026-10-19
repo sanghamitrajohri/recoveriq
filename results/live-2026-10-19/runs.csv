@@ -1,0 +1,109 @@
+run_id,benchmark_id,strategy,task_id,scenario,repeat,llm_mode,jev_mode,outcome,verified_success,total_cost_usd,llm_cost_usd,jev_cost_usd,attempts,recovery_actions,human_escalations,budget_violations,policy_overrides,latency_s,all_measured,actions
+fixed_retry-t1_median-r0,live-2026-10-19,fixed_retry,t1_median,transient_api_error,0,live,n/a,success,1,0.002077,0.002077,0,3,2,0,0,0,3.4934,1,"[""retry"", ""retry""]"
+rule_based-t1_median-r0,live-2026-10-19,rule_based,t1_median,transient_api_error,0,live,n/a,success,1,0.002077,0.002077,0,3,2,0,0,0,3.2356,1,"[""retry"", ""retry""]"
+recoveriq_raw-t1_median-r0,live-2026-10-19,recoveriq_raw,t1_median,transient_api_error,0,live,live,success,1,0.00217507,0.002077,9.807e-05,3,2,0,0,0,3.4008,1,"[""retry"", ""retry""]"
+recoveriq-t1_median-r0,live-2026-10-19,recoveriq,t1_median,transient_api_error,0,live,live,success,1,0.00803307,0.007935,9.807e-05,3,2,0,0,0,3.1624,1,"[""retry"", ""switch_model""]"
+fixed_retry-t2_duration-r0,live-2026-10-19,fixed_retry,t2_duration,workspace_corruption,0,live,n/a,success,1,0.018068,0.018068,0,4,3,0,0,0,28.4779,1,"[""retry"", ""retry"", ""retry""]"
+rule_based-t2_duration-r0,live-2026-10-19,rule_based,t2_duration,workspace_corruption,0,live,n/a,success,1,0.005208,0.005208,0,2,1,0,0,0,7.5894,1,"[""restore_checkpoint""]"
+recoveriq_raw-t2_duration-r0,live-2026-10-19,recoveriq_raw,t2_duration,workspace_corruption,0,live,live,success,1,0.00525937,0.005208,5.137e-05,2,1,0,0,0,7.4681,1,"[""restore_checkpoint""]"
+recoveriq-t2_duration-r0,live-2026-10-19,recoveriq,t2_duration,workspace_corruption,0,live,live,success,1,0.00525937,0.005208,5.137e-05,2,1,0,0,0,7.4969,1,"[""restore_checkpoint""]"
+fixed_retry-t3_inventory-r0,live-2026-10-19,fixed_retry,t3_inventory,output_truncation,0,live,n/a,terminated,0,0.039034,0.039034,0,5,5,0,0,1,44.5024,1,"[""retry"", ""retry"", ""retry"", ""retry"", ""terminate""]"
+rule_based-t3_inventory-r0,live-2026-10-19,rule_based,t3_inventory,output_truncation,0,live,n/a,success,1,0.089606,0.089606,0,2,1,0,0,0,30.615,1,"[""switch_model""]"
+recoveriq_raw-t3_inventory-r0,live-2026-10-19,recoveriq_raw,t3_inventory,output_truncation,0,live,live,success,1,0.09777169,0.097648,0.00012369,3,2,0,0,0,40.4434,1,"[""retry"", ""switch_model""]"
+recoveriq-t3_inventory-r0,live-2026-10-19,recoveriq,t3_inventory,output_truncation,0,live,live,success,1,0.08966749,0.089606,6.149e-05,2,1,0,0,0,30.8342,1,"[""switch_model""]"
+fixed_retry-t4_pricing-r0,live-2026-10-19,fixed_retry,t4_pricing,missing_requirement,0,live,n/a,terminated,0,0.015043,0.015043,0,5,5,0,0,1,25.923,1,"[""retry"", ""retry"", ""retry"", ""retry"", ""terminate""]"
+rule_based-t4_pricing-r0,live-2026-10-19,rule_based,t4_pricing,missing_requirement,0,live,n/a,success,1,0.002634,0.002634,0,2,1,1,0,0,4.034,1,"[""human_escalation""]"
+recoveriq_raw-t4_pricing-r0,live-2026-10-19,recoveriq_raw,t4_pricing,missing_requirement,0,live,live,success,1,0.05155908,0.051407,0.00015208,4,3,1,0,0,27.915,1,"[""retry"", ""switch_model"", ""human_escalation""]"
+recoveriq-t4_pricing-r0,live-2026-10-19,recoveriq,t4_pricing,missing_requirement,0,live,live,success,1,0.04840066,0.048302,9.866e-05,3,2,1,0,0,22.1341,1,"[""switch_model"", ""human_escalation""]"
+fixed_retry-t5_slugify-r0,live-2026-10-19,fixed_retry,t5_slugify,contradictory_spec,0,live,n/a,terminated,0,0.025105,0.025105,0,5,5,0,0,1,43.6896,1,"[""retry"", ""retry"", ""retry"", ""retry"", ""terminate""]"
+rule_based-t5_slugify-r0,live-2026-10-19,rule_based,t5_slugify,contradictory_spec,0,live,n/a,success,1,0.053096,0.053096,0,3,2,0,0,0,32.7453,1,"[""switch_model"", ""retry""]"
+recoveriq_raw-t5_slugify-r0,live-2026-10-19,recoveriq_raw,t5_slugify,contradictory_spec,0,live,live,success,1,0.04956109,0.049466,9.509e-05,3,2,0,0,0,30.0179,1,"[""switch_model"", ""retry""]"
+recoveriq-t5_slugify-r0,live-2026-10-19,recoveriq,t5_slugify,contradictory_spec,0,live,live,terminated,0,0.029211,0.029116,9.5e-05,2,2,0,0,0,21.7777,1,"[""switch_model"", ""terminate""]"
+fixed_retry-t6_wordcount-r0,live-2026-10-19,fixed_retry,t6_wordcount,clean,0,live,n/a,success,1,0.001231,0.001231,0,1,0,0,0,0,2.0633,1,[]
+rule_based-t6_wordcount-r0,live-2026-10-19,rule_based,t6_wordcount,clean,0,live,n/a,success,1,0.001231,0.001231,0,1,0,0,0,0,2.069,1,[]
+recoveriq_raw-t6_wordcount-r0,live-2026-10-19,recoveriq_raw,t6_wordcount,clean,0,live,live,success,1,0.001231,0.001231,0,1,0,0,0,0,2.0448,1,[]
+recoveriq-t6_wordcount-r0,live-2026-10-19,recoveriq,t6_wordcount,clean,0,live,live,success,1,0.001231,0.001231,0,1,0,0,0,0,2.0506,1,[]
+fixed_retry-t7_temperature-r0,live-2026-10-19,fixed_retry,t7_temperature,silent_corruption,0,live,n/a,terminated,0,0.020677,0.020677,0,5,5,0,0,1,35.9632,1,"[""retry"", ""retry"", ""retry"", ""retry"", ""terminate""]"
+rule_based-t7_temperature-r0,live-2026-10-19,rule_based,t7_temperature,silent_corruption,0,live,n/a,terminated,0,0.185202,0.185202,0,5,5,1,0,0,96.9017,1,"[""retry"", ""switch_model"", ""human_escalation"", ""retry"", ""terminate""]"
+recoveriq_raw-t7_temperature-r0,live-2026-10-19,recoveriq_raw,t7_temperature,silent_corruption,0,live,live,success,1,0.00244284,0.00239,5.284e-05,2,1,0,0,0,4.2024,1,"[""restore_checkpoint""]"
+recoveriq-t7_temperature-r0,live-2026-10-19,recoveriq,t7_temperature,silent_corruption,0,live,live,success,1,0.00244284,0.00239,5.284e-05,2,1,0,0,0,4.199,1,"[""restore_checkpoint""]"
+fixed_retry-t8_versions-r0,live-2026-10-19,fixed_retry,t8_versions,capability_gap,0,live,n/a,success,1,0.001195,0.001195,0,1,0,0,0,0,1.9981,1,[]
+rule_based-t8_versions-r0,live-2026-10-19,rule_based,t8_versions,capability_gap,0,live,n/a,success,1,0.001195,0.001195,0,1,0,0,0,0,1.9718,1,[]
+recoveriq_raw-t8_versions-r0,live-2026-10-19,recoveriq_raw,t8_versions,capability_gap,0,live,live,success,1,0.001195,0.001195,0,1,0,0,0,0,1.9747,1,[]
+recoveriq-t8_versions-r0,live-2026-10-19,recoveriq,t8_versions,capability_gap,0,live,live,success,1,0.001195,0.001195,0,1,0,0,0,0,2.0002,1,[]
+fixed_retry-t9_chunks-r0,live-2026-10-19,fixed_retry,t9_chunks,inferable_edge_case,0,live,n/a,success,1,0.000866,0.000866,0,1,0,0,0,0,1.5266,1,[]
+rule_based-t9_chunks-r0,live-2026-10-19,rule_based,t9_chunks,inferable_edge_case,0,live,n/a,success,1,0.000866,0.000866,0,1,0,0,0,0,1.5015,1,[]
+recoveriq_raw-t9_chunks-r0,live-2026-10-19,recoveriq_raw,t9_chunks,inferable_edge_case,0,live,live,success,1,0.000866,0.000866,0,1,0,0,0,0,1.5085,1,[]
+recoveriq-t9_chunks-r0,live-2026-10-19,recoveriq,t9_chunks,inferable_edge_case,0,live,live,success,1,0.000866,0.000866,0,1,0,0,0,0,1.5264,1,[]
+fixed_retry-t1_median-r1,live-2026-10-19,fixed_retry,t1_median,transient_api_error,1,live,n/a,success,1,0.002077,0.002077,0,3,2,0,0,0,3.2915,1,"[""retry"", ""retry""]"
+rule_based-t1_median-r1,live-2026-10-19,rule_based,t1_median,transient_api_error,1,live,n/a,success,1,0.002077,0.002077,0,3,2,0,0,0,3.2445,1,"[""retry"", ""retry""]"
+recoveriq_raw-t1_median-r1,live-2026-10-19,recoveriq_raw,t1_median,transient_api_error,1,live,live,success,1,0.00217507,0.002077,9.807e-05,3,2,0,0,0,3.4789,1,"[""retry"", ""retry""]"
+recoveriq-t1_median-r1,live-2026-10-19,recoveriq,t1_median,transient_api_error,1,live,live,success,1,0.00818542,0.00809,9.542e-05,3,2,1,0,0,3.2133,1,"[""switch_model"", ""human_escalation""]"
+fixed_retry-t2_duration-r1,live-2026-10-19,fixed_retry,t2_duration,workspace_corruption,1,live,n/a,terminated,0,0.024133,0.024133,0,5,5,0,0,1,39.9661,1,"[""retry"", ""retry"", ""retry"", ""retry"", ""terminate""]"
+rule_based-t2_duration-r1,live-2026-10-19,rule_based,t2_duration,workspace_corruption,1,live,n/a,success,1,0.005208,0.005208,0,2,1,0,0,0,7.4552,1,"[""restore_checkpoint""]"
+recoveriq_raw-t2_duration-r1,live-2026-10-19,recoveriq_raw,t2_duration,workspace_corruption,1,live,live,success,1,0.00525937,0.005208,5.137e-05,2,1,0,0,0,7.5306,1,"[""restore_checkpoint""]"
+recoveriq-t2_duration-r1,live-2026-10-19,recoveriq,t2_duration,workspace_corruption,1,live,live,success,1,0.00525937,0.005208,5.137e-05,2,1,0,0,0,7.5007,1,"[""restore_checkpoint""]"
+fixed_retry-t3_inventory-r1,live-2026-10-19,fixed_retry,t3_inventory,output_truncation,1,live,n/a,terminated,0,0.039034,0.039034,0,5,5,0,0,1,44.4321,1,"[""retry"", ""retry"", ""retry"", ""retry"", ""terminate""]"
+rule_based-t3_inventory-r1,live-2026-10-19,rule_based,t3_inventory,output_truncation,1,live,n/a,success,1,0.089606,0.089606,0,2,1,0,0,0,30.8428,1,"[""switch_model""]"
+recoveriq_raw-t3_inventory-r1,live-2026-10-19,recoveriq_raw,t3_inventory,output_truncation,1,live,live,success,1,0.09777169,0.097648,0.00012369,3,2,0,0,0,40.1549,1,"[""retry"", ""switch_model""]"
+recoveriq-t3_inventory-r1,live-2026-10-19,recoveriq,t3_inventory,output_truncation,1,live,live,success,1,0.08966749,0.089606,6.149e-05,2,1,0,0,0,31.4227,1,"[""switch_model""]"
+fixed_retry-t4_pricing-r1,live-2026-10-19,fixed_retry,t4_pricing,missing_requirement,1,live,n/a,terminated,0,0.015898,0.015898,0,5,5,0,0,1,25.5537,1,"[""retry"", ""retry"", ""retry"", ""retry"", ""terminate""]"
+rule_based-t4_pricing-r1,live-2026-10-19,rule_based,t4_pricing,missing_requirement,1,live,n/a,success,1,0.002634,0.002634,0,2,1,1,0,0,3.9701,1,"[""human_escalation""]"
+recoveriq_raw-t4_pricing-r1,live-2026-10-19,recoveriq_raw,t4_pricing,missing_requirement,1,live,live,success,1,0.04788404,0.047732,0.00015204,4,3,1,0,0,26.5892,1,"[""retry"", ""switch_model"", ""human_escalation""]"
+recoveriq-t4_pricing-r1,live-2026-10-19,recoveriq,t4_pricing,missing_requirement,1,live,live,success,1,0.04498066,0.044882,9.866e-05,3,2,1,0,0,20.2931,1,"[""switch_model"", ""human_escalation""]"
+fixed_retry-t5_slugify-r1,live-2026-10-19,fixed_retry,t5_slugify,contradictory_spec,1,live,n/a,terminated,0,0.025105,0.025105,0,5,5,0,0,1,43.3946,1,"[""retry"", ""retry"", ""retry"", ""retry"", ""terminate""]"
+rule_based-t5_slugify-r1,live-2026-10-19,rule_based,t5_slugify,contradictory_spec,1,live,n/a,success,1,0.065211,0.065211,0,3,2,0,0,0,36.9995,1,"[""switch_model"", ""retry""]"
+recoveriq_raw-t5_slugify-r1,live-2026-10-19,recoveriq_raw,t5_slugify,contradictory_spec,1,live,live,success,1,0.05685013,0.056703,0.00014713,4,3,0,0,0,39.1416,1,"[""retry"", ""switch_model"", ""retry""]"
+recoveriq-t5_slugify-r1,live-2026-10-19,recoveriq,t5_slugify,contradictory_spec,1,live,live,success,1,0.04326417,0.043216,4.817e-05,2,1,0,0,0,28.6527,1,"[""switch_model""]"
+fixed_retry-t6_wordcount-r1,live-2026-10-19,fixed_retry,t6_wordcount,clean,1,live,n/a,success,1,0.001231,0.001231,0,1,0,0,0,0,2.1823,1,[]
+rule_based-t6_wordcount-r1,live-2026-10-19,rule_based,t6_wordcount,clean,1,live,n/a,success,1,0.001231,0.001231,0,1,0,0,0,0,2.0327,1,[]
+recoveriq_raw-t6_wordcount-r1,live-2026-10-19,recoveriq_raw,t6_wordcount,clean,1,live,live,success,1,0.001231,0.001231,0,1,0,0,0,0,2.0661,1,[]
+recoveriq-t6_wordcount-r1,live-2026-10-19,recoveriq,t6_wordcount,clean,1,live,live,success,1,0.001231,0.001231,0,1,0,0,0,0,2.0168,1,[]
+fixed_retry-t7_temperature-r1,live-2026-10-19,fixed_retry,t7_temperature,silent_corruption,1,live,n/a,terminated,0,0.020677,0.020677,0,5,5,0,0,1,36.4551,1,"[""retry"", ""retry"", ""retry"", ""retry"", ""terminate""]"
+rule_based-t7_temperature-r1,live-2026-10-19,rule_based,t7_temperature,silent_corruption,1,live,n/a,terminated,0,0.060367,0.060367,0,3,3,0,0,0,33.0942,1,"[""retry"", ""switch_model"", ""terminate""]"
+recoveriq_raw-t7_temperature-r1,live-2026-10-19,recoveriq_raw,t7_temperature,silent_corruption,1,live,live,success,1,0.00244284,0.00239,5.284e-05,2,1,0,0,0,4.2041,1,"[""restore_checkpoint""]"
+recoveriq-t7_temperature-r1,live-2026-10-19,recoveriq,t7_temperature,silent_corruption,1,live,live,success,1,0.00244284,0.00239,5.284e-05,2,1,0,0,0,4.2018,1,"[""restore_checkpoint""]"
+fixed_retry-t8_versions-r1,live-2026-10-19,fixed_retry,t8_versions,capability_gap,1,live,n/a,success,1,0.001195,0.001195,0,1,0,0,0,0,2.0291,1,[]
+rule_based-t8_versions-r1,live-2026-10-19,rule_based,t8_versions,capability_gap,1,live,n/a,success,1,0.001195,0.001195,0,1,0,0,0,0,2.0594,1,[]
+recoveriq_raw-t8_versions-r1,live-2026-10-19,recoveriq_raw,t8_versions,capability_gap,1,live,live,success,1,0.001195,0.001195,0,1,0,0,0,0,1.9872,1,[]
+recoveriq-t8_versions-r1,live-2026-10-19,recoveriq,t8_versions,capability_gap,1,live,live,success,1,0.001195,0.001195,0,1,0,0,0,0,1.9811,1,[]
+fixed_retry-t9_chunks-r1,live-2026-10-19,fixed_retry,t9_chunks,inferable_edge_case,1,live,n/a,success,1,0.000866,0.000866,0,1,0,0,0,0,1.608,1,[]
+rule_based-t9_chunks-r1,live-2026-10-19,rule_based,t9_chunks,inferable_edge_case,1,live,n/a,success,1,0.000866,0.000866,0,1,0,0,0,0,1.6118,1,[]
+recoveriq_raw-t9_chunks-r1,live-2026-10-19,recoveriq_raw,t9_chunks,inferable_edge_case,1,live,live,success,1,0.000866,0.000866,0,1,0,0,0,0,1.6028,1,[]
+recoveriq-t9_chunks-r1,live-2026-10-19,recoveriq,t9_chunks,inferable_edge_case,1,live,live,success,1,0.000866,0.000866,0,1,0,0,0,0,1.6236,1,[]
+fixed_retry-t1_median-r2,live-2026-10-19,fixed_retry,t1_median,transient_api_error,2,live,n/a,success,1,0.002077,0.002077,0,3,2,0,0,0,3.2516,1,"[""retry"", ""retry""]"
+rule_based-t1_median-r2,live-2026-10-19,rule_based,t1_median,transient_api_error,2,live,n/a,success,1,0.002077,0.002077,0,3,2,0,0,0,3.401,1,"[""retry"", ""retry""]"
+recoveriq_raw-t1_median-r2,live-2026-10-19,recoveriq_raw,t1_median,transient_api_error,2,live,live,success,1,0.00217507,0.002077,9.807e-05,3,2,0,0,0,3.6362,1,"[""retry"", ""retry""]"
+recoveriq-t1_median-r2,live-2026-10-19,recoveriq,t1_median,transient_api_error,2,live,live,success,1,0.00803307,0.007935,9.807e-05,3,2,0,0,0,3.114,1,"[""retry"", ""switch_model""]"
+fixed_retry-t2_duration-r2,live-2026-10-19,fixed_retry,t2_duration,workspace_corruption,2,live,n/a,terminated,0,0.024133,0.024133,0,5,5,0,0,1,40.7594,1,"[""retry"", ""retry"", ""retry"", ""retry"", ""terminate""]"
+rule_based-t2_duration-r2,live-2026-10-19,rule_based,t2_duration,workspace_corruption,2,live,n/a,success,1,0.005208,0.005208,0,2,1,0,0,0,7.601,1,"[""restore_checkpoint""]"
+recoveriq_raw-t2_duration-r2,live-2026-10-19,recoveriq_raw,t2_duration,workspace_corruption,2,live,live,success,1,0.00525937,0.005208,5.137e-05,2,1,0,0,0,7.6022,1,"[""restore_checkpoint""]"
+recoveriq-t2_duration-r2,live-2026-10-19,recoveriq,t2_duration,workspace_corruption,2,live,live,success,1,0.00525937,0.005208,5.137e-05,2,1,0,0,0,7.5273,1,"[""restore_checkpoint""]"
+fixed_retry-t3_inventory-r2,live-2026-10-19,fixed_retry,t3_inventory,output_truncation,2,live,n/a,terminated,0,0.039034,0.039034,0,5,5,0,0,1,44.6275,1,"[""retry"", ""retry"", ""retry"", ""retry"", ""terminate""]"
+rule_based-t3_inventory-r2,live-2026-10-19,rule_based,t3_inventory,output_truncation,2,live,n/a,success,1,0.089606,0.089606,0,2,1,0,0,0,30.7783,1,"[""switch_model""]"
+recoveriq_raw-t3_inventory-r2,live-2026-10-19,recoveriq_raw,t3_inventory,output_truncation,2,live,live,success,1,0.09777169,0.097648,0.00012369,3,2,0,0,0,25.9195,1,"[""retry"", ""switch_model""]"
+recoveriq-t3_inventory-r2,live-2026-10-19,recoveriq,t3_inventory,output_truncation,2,live,live,success,1,0.08966749,0.089606,6.149e-05,2,1,0,0,0,31.0063,1,"[""switch_model""]"
+fixed_retry-t4_pricing-r2,live-2026-10-19,fixed_retry,t4_pricing,missing_requirement,2,live,n/a,terminated,0,0.015043,0.015043,0,5,5,0,0,1,26.8526,1,"[""retry"", ""retry"", ""retry"", ""retry"", ""terminate""]"
+rule_based-t4_pricing-r2,live-2026-10-19,rule_based,t4_pricing,missing_requirement,2,live,n/a,success,1,0.002634,0.002634,0,2,1,1,0,0,4.1793,1,"[""human_escalation""]"
+recoveriq_raw-t4_pricing-r2,live-2026-10-19,recoveriq_raw,t4_pricing,missing_requirement,2,live,live,success,1,0.05635408,0.056202,0.00015208,4,3,1,0,0,94.473,1,"[""retry"", ""switch_model"", ""human_escalation""]"
+recoveriq-t4_pricing-r2,live-2026-10-19,recoveriq,t4_pricing,missing_requirement,2,live,live,success,1,0.04622066,0.046122,9.866e-05,3,2,1,0,0,21.0652,1,"[""switch_model"", ""human_escalation""]"
+fixed_retry-t5_slugify-r2,live-2026-10-19,fixed_retry,t5_slugify,contradictory_spec,2,live,n/a,terminated,0,0.025105,0.025105,0,5,5,0,0,1,43.4264,1,"[""retry"", ""retry"", ""retry"", ""retry"", ""terminate""]"
+rule_based-t5_slugify-r2,live-2026-10-19,rule_based,t5_slugify,contradictory_spec,2,live,n/a,success,1,0.041571,0.041571,0,3,2,0,0,0,26.1007,1,"[""switch_model"", ""retry""]"
+recoveriq_raw-t5_slugify-r2,live-2026-10-19,recoveriq_raw,t5_slugify,contradictory_spec,2,live,live,success,1,0.04764609,0.047551,9.509e-05,3,2,0,0,0,29.7524,1,"[""switch_model"", ""retry""]"
+recoveriq-t5_slugify-r2,live-2026-10-19,recoveriq,t5_slugify,contradictory_spec,2,live,live,terminated,0,0.02056109,0.020466,9.509e-05,2,2,0,0,0,17.7424,1,"[""switch_model"", ""terminate""]"
+fixed_retry-t6_wordcount-r2,live-2026-10-19,fixed_retry,t6_wordcount,clean,2,live,n/a,success,1,0.001231,0.001231,0,1,0,0,0,0,2.0655,1,[]
+rule_based-t6_wordcount-r2,live-2026-10-19,rule_based,t6_wordcount,clean,2,live,n/a,success,1,0.001231,0.001231,0,1,0,0,0,0,2.0396,1,[]
+recoveriq_raw-t6_wordcount-r2,live-2026-10-19,recoveriq_raw,t6_wordcount,clean,2,live,live,success,1,0.001231,0.001231,0,1,0,0,0,0,2.0723,1,[]
+recoveriq-t6_wordcount-r2,live-2026-10-19,recoveriq,t6_wordcount,clean,2,live,live,success,1,0.001231,0.001231,0,1,0,0,0,0,2.0305,1,[]
+fixed_retry-t7_temperature-r2,live-2026-10-19,fixed_retry,t7_temperature,silent_corruption,2,live,n/a,terminated,0,0.020677,0.020677,0,5,5,0,0,1,36.1472,1,"[""retry"", ""retry"", ""retry"", ""retry"", ""terminate""]"
+rule_based-t7_temperature-r2,live-2026-10-19,rule_based,t7_temperature,silent_corruption,2,live,n/a,terminated,0,0.116217,0.116217,0,3,3,0,0,0,67.8363,1,"[""retry"", ""switch_model"", ""terminate""]"
+recoveriq_raw-t7_temperature-r2,live-2026-10-19,recoveriq_raw,t7_temperature,silent_corruption,2,live,live,success,1,0.00244284,0.00239,5.284e-05,2,1,0,0,0,4.5059,1,"[""restore_checkpoint""]"
+recoveriq-t7_temperature-r2,live-2026-10-19,recoveriq,t7_temperature,silent_corruption,2,live,live,success,1,0.00244284,0.00239,5.284e-05,2,1,0,0,0,4.2344,1,"[""restore_checkpoint""]"
+fixed_retry-t8_versions-r2,live-2026-10-19,fixed_retry,t8_versions,capability_gap,2,live,n/a,success,1,0.001195,0.001195,0,1,0,0,0,0,1.9431,1,[]
+rule_based-t8_versions-r2,live-2026-10-19,rule_based,t8_versions,capability_gap,2,live,n/a,success,1,0.001195,0.001195,0,1,0,0,0,0,1.9664,1,[]
+recoveriq_raw-t8_versions-r2,live-2026-10-19,recoveriq_raw,t8_versions,capability_gap,2,live,live,success,1,0.001195,0.001195,0,1,0,0,0,0,1.9708,1,[]
+recoveriq-t8_versions-r2,live-2026-10-19,recoveriq,t8_versions,capability_gap,2,live,live,success,1,0.001195,0.001195,0,1,0,0,0,0,1.9847,1,[]
+fixed_retry-t9_chunks-r2,live-2026-10-19,fixed_retry,t9_chunks,inferable_edge_case,2,live,n/a,success,1,0.000866,0.000866,0,1,0,0,0,0,1.4568,1,[]
+rule_based-t9_chunks-r2,live-2026-10-19,rule_based,t9_chunks,inferable_edge_case,2,live,n/a,success,1,0.000866,0.000866,0,1,0,0,0,0,1.5815,1,[]
+recoveriq_raw-t9_chunks-r2,live-2026-10-19,recoveriq_raw,t9_chunks,inferable_edge_case,2,live,live,success,1,0.000866,0.000866,0,1,0,0,0,0,1.476,1,[]
+recoveriq-t9_chunks-r2,live-2026-10-19,recoveriq,t9_chunks,inferable_edge_case,2,live,live,success,1,0.000866,0.000866,0,1,0,0,0,0,1.4988,1,[]

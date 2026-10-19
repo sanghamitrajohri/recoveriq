@@ -9,3 +9,7 @@ results/*
 !results/README.md
 .pytest_cache/
 .DS_Store
+# Live benchmark evidence is committed (no secrets; checked before commit).
+!results/live-2026-10-19/
+!results/live-2026-10-19.log
+!results/live_checks.jsonl

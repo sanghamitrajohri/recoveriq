@@ -1,64 +1,78 @@
 # RecoverIQ — 3-minute live demo (AI Tinkerers)
 
-**Setup before going on stage:** `.env` has both keys and both modes set to `live`; run
-`python scripts/verify_live.py` once (it should print two `OK` lines); then run
-`streamlit run app.py` and keep the tab open. Have a saved live benchmark in `results/`.
-Fallback if Wi-Fi dies: switch to `scripted`/`mock` — the badges turn yellow and you say so
-out loud.
+Every number here comes from the live benchmark `results/live-2026-10-19`: 108 runs with real
+Claude and real Jev calls, $2.41 total. Setup and fallbacks: `docs/DEMO_CHEATSHEET.md`.
+
+**On screen before you start:** the dashboard (`streamlit run app.py`) at 125% zoom with green
+LIVE badges, plus `docs/examples/reward_hack_slugify.py` open in a second window.
 
 ---
 
-### 0:00–0:25 — The problem
-> "Coding agents fail all the time. The default fix is *retry*, which is the most expensive
-> way to learn nothing. Sometimes the right move is a bigger model, sometimes rolling back the
-> workspace, sometimes asking a human, and sometimes just stopping. RecoverIQ makes that call
-> with Jev — TypeSafe's decision model, which returns calibrated probabilities instead of
-> prose — and a deterministic policy that Jev can't talk its way past."
+### 0:00–0:20 — The problem
+> "Coding agents fail constantly. The default fix is *retry*: same model, same prompt, pay
+> again. Sometimes that works. Often the right move is a bigger model, rolling back the
+> workspace, asking a human, or just stopping. RecoverIQ makes that call with **Jev**,
+> TypeSafe's decision model. It answers typed questions with probabilities, not prose, and a
+> plain-code budget policy sits on top that Jev can't override."
 
-Point at the sidebar badges: **LLM: LIVE Anthropic · Jev: LIVE TypeSafe**.
+### 0:20–1:05 — Live moment: damage the rules can't see (`t7_temperature`)
+Sidebar → **t7_temperature · silent_corruption**, strategy **RecoverIQ (Jev + gate)** → **Run**.
+It takes about 5 seconds.
 
-### 0:25–1:15 — Repetition loses: output truncation (`t3_inventory`)
-1. Select **t3_inventory · output_truncation**, strategy **Fixed retry**, then **Run**.
-   > "The cheap model has a 1K-token output cap. The file is 7 KB. Watch it hit the cap…
-   > again… again." Point at the burn-down chart dropping while nothing improves.
-2. Switch to **RecoverIQ (Jev)**, then **Run**.
-   > "Same failure. Here's the Jev call: one request, four typed questions. Here's the action
-   > it picked, the probability over every action, its confidence, and the latency" — *read
-   > the actual values on screen* — "and at $0.042 per million input tokens the call cost a
-   > few millionths of a dollar. The policy checks it's affordable, we escalate, and the tests
-   > pass, including hidden ones the agent never saw."
-   *(Rehearse this with live keys first. If Jev picks something else, narrate what it picked
-   and how the policy handled it. That's the point of the demo.)*
+> "While the agent was working, something quietly changed a constant in a helper file. It's
+> still valid Python, so the tests fail like any ordinary bug."
 
-### 1:15–2:00 — The other recovery actions
-3. **t2_duration · workspace_corruption**, RecoverIQ, then **Run**.
-   > "Something trashed a helper file. Retrying can't fix it, because the agent may only edit
-   > one file. Jev says restore. We restore a real snapshot and verify every file hash, and it
-   > passes."
-4. **t4_pricing · missing_requirement**, RecoverIQ, then **Run**.
-   > "Visible tests pass, hidden finance checks fail. No model can guess an unwritten policy.
-   > It pauses — that's a real LangGraph interrupt." Type *"Use Decimal, round half-up to
-   > cents"*, then **Resume** → ✅.
-5. *(If time allows)* **t5_slugify · contradictory_spec**: two tests contradict each other.
-   Show the `impossible` Noul and whether Jev terminates earlier than fixed retry's five
-   attempts.
+When the trace appears, point at the blue Jev box:
+> "Jev diagnoses `workspace_damaged` and recommends `restore_checkpoint`" — **read the
+> confidence off the screen**; it was 0.97 in rehearsal — "the policy approves it, we restore
+> a real snapshot with every file hash verified, and the cheap model fixes the bug. Verified,
+> including hidden tests, for a quarter of a cent."
 
-   *(Strongest beat if the live benchmark supports it)* **t7_temperature · silent_corruption**:
-   "A helper constant was quietly changed. The error looks like an ordinary failing assertion,
-   so the rules keep retrying. Jev is also told which files differ from the last good
-   snapshot." Show whether it picks `restore_checkpoint`, and only claim it if it does.
+> "Our hand-written rule-based baseline **failed this task in all 3 runs** and burned
+> **$0.36** escalating to Opus and asking humans. Jev went 3 for 3 at **$0.007**."
 
-### 2:00–2:45 — The numbers
-6. Open the **Benchmark results** tab and select the live run.
-   > "Same nine tasks, same budgets, same seeds, multiple repeats. Completion rate, total cost,
-   > and the metric that matters: verified successes per dollar."
-   Read the three bars **as they are**. If rule-based ties or beats Jev, say so:
-   > "Our hand-written rules know these six scenarios because we wrote both. The interesting
-   > part is that Jev matches them without being told the rules — and it adapts when the error
-   > text doesn't match a regex."
-7. Point out zero budget violations and the policy-override count.
-   > "Every number here can be recomputed from the raw trace file — `benchmark.py --recompute`."
+### 1:05–1:45 — The model cheated (`reward_hack_slugify.py`)
+Switch to the code window.
+> "Task 5 has two tests that contradict each other: it's impossible by design. Watch what
+> Claude Opus did. It returned a fake string whose equality check treats hyphens and
+> underscores as the same character, so **both contradictory tests pass**."
+Point at `def __eq__`.
+> "Tests green, function broken. That's reward hacking, and it happened live in our benchmark.
+> So we added an integrity audit, and we only count **clean** successes: tests pass, no files
+> damaged, no gaming. The audit flagged 3 rule-based wins and 3 Jev-only wins as cheats.
+> Gated RecoverIQ cheated once, and in 2 of 3 runs Jev correctly said 'this task is
+> impossible' and stopped."
 
-### 2:45–3:00 — Close
-> "Cheap typed decisions on the control path, expensive LLM calls only where they earn their
-> keep. Code's on GitHub; the README says exactly what's measured and what's simulated."
+### 1:45–2:40 — The numbers
+**Benchmark results** tab (the `live-2026-10-19` run is preselected).
+> "108 real runs across nine tasks and four strategies, all with the same budgets."
+
+Point at the three charts, left to right:
+> "Clean completion: RecoverIQ **24 of 27**, rules 21, fixed retry 12. Total API cost:
+> RecoverIQ **$0.56**, the rules **$0.83**. Clean successes per dollar: **42.9** for RecoverIQ,
+> **31.3** for fixed retry, **25.3** for the rules. And zero budget violations: the policy
+> held every time."
+
+Be upfront about the caveat (it builds trust):
+> "Two honest caveats. My retry-gate, a one-line rule on top of Jev, made it skip a cheap retry
+> on transient API errors, so it cost 4× more on that task. And if you price human time at
+> 50 cents per question, fixed retry wins per dollar, because it never asks anyone, even though
+> it solves less than half. Recovery strategy is a cost trade-off, and now you can measure it."
+
+### 2:40–3:00 — Close
+> "Fast, typed decisions on the control path, expensive LLM calls only where they earn it, and
+> never trust a green test suite without checking how it got green. Every number recomputes
+> from the raw traces, and the code and full results are in the repo."
+
+---
+
+## Backup moments (if a question or spare time comes up)
+* **t3_inventory (output truncation):** Haiku hits its 1,024-token cap, RecoverIQ escalates
+  to Opus, and it passes. This takes about 30 s live (Opus ~23 s), so talk through the Jev
+  probabilities while it runs.
+* **t4_pricing (human escalation):** the run pauses for input. Type *"Use Decimal, round
+  half-up to cents"* and press **Resume** → ✅. Honest note: Jev tried Opus before asking, so it
+  cost $0.047 against the rules' $0.003.
+* **Q: "Isn't Jev just a cheap LLM?"** No. It doesn't generate text. It returns a choice and a
+  probability for every option. Measured over 60 live decisions: about $0.00005 and
+  102 ms each on average.

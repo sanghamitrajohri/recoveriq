@@ -17,8 +17,9 @@ from strategies import STRATEGY_NAMES, make_strategy
 st.set_page_config(page_title="RecoverIQ", page_icon="🛟", layout="wide")
 
 # Categorical slots 1-3 of the validated reference palette; color follows the strategy, never rank.
-COLORS = {"recoveriq": "#2a78d6", "rule_based": "#eb6834", "fixed_retry": "#1baf7a"}
-LABELS = {"recoveriq": "RecoverIQ (Jev)", "rule_based": "Rule-based", "fixed_retry": "Fixed retry"}
+COLORS = {"recoveriq": "#2a78d6", "rule_based": "#eb6834", "fixed_retry": "#1baf7a", "recoveriq_raw": "#eda100"}
+LABELS = {"recoveriq": "RecoverIQ (Jev + gate)", "rule_based": "Rule-based", "fixed_retry": "Fixed retry",
+          "recoveriq_raw": "Jev only (no gate)"}
 ACTION_ICONS = {"retry": "🔁", "switch_model": "⬆️", "restore_checkpoint": "⏪", "human_escalation": "🙋",
                 "terminate": "⛔"}
 STATUS_ICONS = {"success": "✅", "llm_error": "🌩️", "output_truncated": "✂️", "malformed_output": "🧩",
@@ -51,7 +52,7 @@ with st.sidebar:
                    "RECOVERIQ_JEV_MODE=live in .env for real API calls.")
     task_id = st.selectbox("Task & failure scenario", list(tasks),
                            format_func=lambda t: f"{t} · {tasks[t].scenario}")
-    strategy_name = st.selectbox("Recovery strategy", STRATEGY_NAMES, index=2, format_func=LABELS.get)
+    strategy_name = st.selectbox("Recovery strategy", STRATEGY_NAMES, index=3, format_func=LABELS.get)
     with st.expander("Budget limits"):
         max_cost = st.number_input("Max cost per task (USD)", 0.001, 5.0, Budget.max_cost_usd, 0.01, format="%.3f")
         max_attempts = st.slider("Max attempts", 1, 10, Budget.max_attempts)
@@ -180,17 +181,33 @@ def metric_bars(df: pd.DataFrame, field: str, title: str, fmt: str) -> alt.Chart
         tooltip=["label", alt.Tooltip(f"{field}:Q", format=fmt)])
     bars = base.mark_bar(cornerRadiusEnd=4, height=18)
     text = base.mark_text(align="left", dx=4).encode(text=alt.Text(f"{field}:Q", format=fmt), color=alt.value("gray"))
-    return (bars + text).properties(height=130, title=title)
+    return (bars + text).properties(height=160, title=title)
 
 
-def comparison_charts(metrics: dict) -> None:
-    df = pd.DataFrame([{"strategy": s, "label": LABELS.get(s, s), **m} for s, m in metrics.items()])
+def comparison_charts(metrics: dict, integrity: dict | None = None) -> None:
+    """Bars per strategy. With an integrity audit, rates use *clean* successes (no gaming, no damage)."""
+    rows = []
+    for s, m in metrics.items():
+        row = {"strategy": s, "label": LABELS.get(s, s), **m}
+        if integrity and s in integrity:
+            i = integrity[s]
+            row.update(clean_successes=i["clean_successes"], clean_rate=i["clean_successes"] / m["runs"],
+                       clean_per_dollar=i["clean_successes_per_dollar"], gamed=i["successes_with_gaming_signals"],
+                       damaged=i["successes_with_damaged_workspace"])
+        rows.append(row)
+    df = pd.DataFrame(rows)
+    clean = integrity is not None and "clean_rate" in df
     c1, c2, c3 = st.columns(3)
-    c1.altair_chart(metric_bars(df, "completion_rate", "Verified completion rate", ".0%"), width="stretch")
-    c2.altair_chart(metric_bars(df, "total_cost_usd", "Total cost (USD)", "$.4f"), width="stretch")
-    c3.altair_chart(metric_bars(df.fillna(0), "successes_per_dollar", "Verified successes per $", ",.1f"),
-                    width="stretch")
-    cols = ["label", "runs", "verified_successes", "completion_rate", "total_cost_usd", "avg_cost_per_success_usd",
+    c1.altair_chart(metric_bars(df, "clean_rate" if clean else "completion_rate",
+                                "Clean completion rate" if clean else "Verified completion rate", ".0%"), width="stretch")
+    c2.altair_chart(metric_bars(df, "total_cost_usd", "Total API cost (USD)", "$.3f"), width="stretch")
+    c3.altair_chart(metric_bars(df.fillna(0), "clean_per_dollar" if clean else "successes_per_dollar",
+                                "Clean successes per $" if clean else "Verified successes per $", ",.1f"), width="stretch")
+    if clean:
+        st.caption("**Clean** = all tests pass (visible + hidden) AND no helper file left damaged AND no test-gaming "
+                   "signals (e.g. overriding `__eq__`). See `scripts/integrity_audit.py`.")
+    cols = ["label", "runs", "verified_successes", "clean_successes", "gamed", "damaged", "completion_rate",
+            "total_cost_usd", "avg_cost_per_success_usd",
             "successes_per_dollar", "successes_per_dollar_incl_human", "avg_attempts", "human_escalations",
             "budget_violations", "policy_overrides", "avg_latency_s", "p95_latency_s", "all_measured"]
     st.dataframe(df[[c for c in cols if c in df]], hide_index=True, width="stretch")
@@ -213,7 +230,7 @@ with tab_compare:
     if st.session_state.get("compare") and st.session_state.compare[0] == task.id:
         _, rows, traces = st.session_state.compare
         comparison_charts({r["strategy"]: aggregate([r], settings.human_cost_usd) for r in rows})
-        cols = st.columns(3)
+        cols = st.columns(len(STRATEGY_NAMES))
         for col, name in zip(cols, STRATEGY_NAMES):
             r = next(x for x in rows if x["strategy"] == name)
             col.markdown(f"**{LABELS[name]}** — {r['outcome']} · {r['attempts']} attempts · ${r['total_cost_usd']:.5f}")
@@ -223,11 +240,14 @@ with tab_compare:
 
 # ----------------------------------------------------------------------------- saved benchmarks
 with tab_bench:
-    dirs = sorted([p for p in RESULTS_DIR.glob("*/metrics.json")], reverse=True)
+    def _rank(p: Path):
+        m = json.loads((p.parent / "manifest.json").read_text())
+        return (m["llm_mode"] == "live" and m["jev_mode"] == "live", p.stat().st_mtime)
+    dirs = sorted(RESULTS_DIR.glob("*/metrics.json"), key=_rank, reverse=True)
     if not dirs:
         st.write("No benchmark results yet. Run `python benchmark.py --repeats 3`.")
     else:
-        choice = st.selectbox("Benchmark run", dirs, format_func=lambda p: p.parent.name)
+        choice = st.selectbox("Benchmark run", dirs, format_func=lambda p: p.parent.name + ("" if _rank(p)[0] else "  (SIMULATED)"))
         manifest = json.loads((choice.parent / "manifest.json").read_text())
         metrics = json.loads(choice.read_text())
         live = manifest["llm_mode"] == "live" and manifest["jev_mode"] == "live"
@@ -236,7 +256,8 @@ with tab_bench:
         st.caption(f"{manifest['repeats']} repeats × {len(manifest['tasks'])} tasks × {len(manifest['strategies'])} "
                    f"strategies · budget ${manifest['budget']['max_cost_usd']}/task, {manifest['budget']['max_attempts']} attempts"
                    f" · commit {manifest.get('git_commit')}")
-        comparison_charts(metrics["by_strategy"])
+        integ_path = choice.parent / "integrity.json"
+        comparison_charts(metrics["by_strategy"], json.loads(integ_path.read_text()) if integ_path.exists() else None)
         st.markdown("**By scenario**")
         rows = [{"strategy": LABELS.get(s, s), "scenario": sc, **{k: m[k] for k in
                 ("verified_successes", "runs", "total_cost_usd", "successes_per_dollar", "avg_attempts", "human_escalations")}}

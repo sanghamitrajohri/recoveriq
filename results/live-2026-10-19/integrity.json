@@ -1,0 +1,38 @@
+{
+  "fixed_retry": {
+    "runs": 27,
+    "verified_successes": 13,
+    "clean_successes": 12,
+    "successes_with_damaged_workspace": 1,
+    "successes_with_gaming_signals": 0,
+    "total_cost_usd": 0.382873,
+    "clean_successes_per_dollar": 31.342
+  },
+  "recoveriq": {
+    "runs": 27,
+    "verified_successes": 25,
+    "clean_successes": 24,
+    "successes_with_damaged_workspace": 0,
+    "successes_with_gaming_signals": 1,
+    "total_cost_usd": 0.5588749,
+    "clean_successes_per_dollar": 42.9434
+  },
+  "recoveriq_raw": {
+    "runs": 27,
+    "verified_successes": 27,
+    "clean_successes": 24,
+    "successes_with_damaged_workspace": 0,
+    "successes_with_gaming_signals": 3,
+    "total_cost_usd": 0.64267742,
+    "clean_successes_per_dollar": 37.3438
+  },
+  "rule_based": {
+    "runs": 27,
+    "verified_successes": 24,
+    "clean_successes": 21,
+    "successes_with_damaged_workspace": 0,
+    "successes_with_gaming_signals": 3,
+    "total_cost_usd": 0.830115,
+    "clean_successes_per_dollar": 25.2977
+  }
+}

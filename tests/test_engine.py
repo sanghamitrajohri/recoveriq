@@ -141,3 +141,25 @@ def test_restore_repairs_silent_corruption(settings, budget, run_root):
     r, s, _ = run("t7_temperature", AlwaysRestore(), settings, budget, run_root)
     assert s["actions"][0] == "restore_checkpoint" and s["status"] == "success"
     assert "F_PER_C = 1.8" in (r.rc.workspace / "constants.py").read_text()
+
+
+class NoulAdapter(JevAdapter):
+    """Stub that picks retry while saying retry probably won't help (the first live observation)."""
+
+    def __init__(self):
+        super().__init__("mock")
+
+    def decide(self, ctx, tests_excerpt=""):
+        return JevDecision("retry", {"retry": 0.69, "switch_model": 0.31}, 0.59, "model_capability_or_output_limit",
+                           {}, 0.19, 0.1, 10, 0, 0.0, 0.0, "stub", None, "mock", False)
+
+
+def test_retry_gate_uses_jevs_next_choice(settings, budget, run_root):
+    r, s, llm = run("t3_inventory", RecoverIQ(NoulAdapter()), settings, budget, run_root)
+    assert s["actions"] == ["switch_model"] and s["status"] == "success"
+    assert llm.models == ["claude-haiku-4-5", "claude-opus-5"]
+
+
+def test_raw_jev_follows_retry(settings, budget, run_root):
+    r, s, llm = run("t3_inventory", RecoverIQ(NoulAdapter(), gate_retry=False), settings, budget, run_root)
+    assert r.rc.strategy.name == "recoveriq_raw" and s["actions"][0] == "retry"

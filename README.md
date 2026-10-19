@@ -13,7 +13,26 @@ Successful Task Completions per Dollar = Verified Successful Tasks / Total Execu
 ```
 
 A task counts as *verified* only when the visible tests **and** hidden acceptance tests pass
-inside the sandbox.
+inside the sandbox, and as *clean* only if, in addition, no helper file was left damaged and
+the patch shows no test-gaming signals (`scripts/integrity_audit.py`).
+
+## Live results (2026-10-19)
+
+108 runs with real Claude and real Jev, $2.41 in total (`results/live-2026-10-19/`,
+details in [`docs/SUMMARY.md`](docs/SUMMARY.md)):
+
+| Strategy | Clean successes | API cost | Clean successes per $ |
+|---|---|---|---|
+| Fixed retry | 12/27 | $0.38 | 31.3 |
+| Rule-based | 21/27 | $0.83 | 25.3 |
+| Jev only | 24/27 | $0.64 | 37.3 |
+| **RecoverIQ (Jev + retry gate)** | **24/27** | **$0.56** | **42.9** |
+
+On silent workspace corruption, Jev restored the checkpoint 3/3 times ($0.007 total) while
+the rules failed 3/3 ($0.36). Opus was caught gaming contradictory tests
+([`docs/examples/reward_hack_slugify.py`](docs/examples/reward_hack_slugify.py)). Including
+imputed human time ($0.50 per escalation), fixed retry has the best ratio. See the summary for
+all caveats (small n; the retry gate was tuned after the first live call).
 
 > **Data provenance is always labeled.** `live` modes make real API calls and record measured
 > token usage. The offline modes — `scripted` LLM and `mock` Jev — exist for development and
@@ -30,7 +49,7 @@ cd recoveriq
 python3.11 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 cp .env.example .env            # add keys later; offline modes work without them
-.venv/bin/python -m pytest      # 59 tests, ~25 s, fully offline
+.venv/bin/python -m pytest      # 61 tests, ~25 s, always offline (never calls paid APIs)
 .venv/bin/streamlit run app.py  # dashboard at http://localhost:8501
 ```
 
@@ -59,7 +78,7 @@ No GPU required. Generated code runs under macOS `sandbox-exec`, which ships wit
    ```bash
    .venv/bin/python benchmark.py --llm-mode live --jev-mode live --repeats 3
    ```
-   Rough spend at default settings: 9 tasks × 3 strategies × 3 repeats = 81 runs; most runs
+   Rough spend at default settings: 9 tasks × 4 strategies × 3 repeats = 108 runs (measured: $2.41); most runs
    cost under $0.01, and the truncation task's Opus escalation is about $0.05–0.10, so expect a
    few dollars in total. Jev itself costs about $0.00004 per decision.
 
@@ -74,7 +93,7 @@ developing Jev prompts.
 | `sandbox.py` | `sandbox-exec` profile: no network, no reading file contents under `$HOME` except the workspace and the venv, writes only to the workspace; scrubbed env, CPU/file-size rlimits, wall-clock timeout with process-group kill |
 | `llm.py` | `AnthropicLLM` (real usage from `response.usage`), `ScriptedLLM` (offline simulator), `FaultInjectingLLM` |
 | `jev_adapter.py` | One `client.system_one()` call per decision: `Choice` over currently-feasible actions, `Choice` failure type, `Noul` "retry would help", `Noul` "task impossible". Plus a labeled mock |
-| `strategies.py` | **A** `FixedRetry`, **B** `RuleBased`, **C** `RecoverIQ` (Jev-ranked actions) |
+| `strategies.py` | **A** `FixedRetry`, **B** `RuleBased`, **C** `RecoverIQ` (Jev-ranked actions + retry gate using Jev's own `retry_would_help` Noul), plus `recoveriq_raw` (Jev without the gate, as an ablation) |
 | `recovery_policy.py` | Action definitions, `RecoveryContext`, `RecoveryPolicy` — rejects invalid, infeasible, unsafe or unaffordable proposals for *every* strategy and walks the ranked fallbacks |
 | `engine.py` | LangGraph `StateGraph`: `attempt → decide → act / human → attempt`. Human escalation uses `interrupt()` + `Command(resume=...)` |
 | `checkpoint_manager.py` | Workspace snapshots stored outside the workspace, restored and verified by SHA-256 manifest |
@@ -83,6 +102,8 @@ developing Jev prompts.
 | `app.py` | Streamlit dashboard: live trace, Jev recommendation, policy verdict, budget burn-down, model usage, side-by-side comparison, saved benchmarks |
 | `scripts/verify_live.py` | Real authenticated Jev + Anthropic checks |
 | `scripts/demo.py` | Terminal side-by-side demo |
+| `scripts/integrity_audit.py` | Flags "successes" that left helper files damaged or gamed the tests; writes `integrity.json` |
+| `scripts/report.py` | Markdown result tables from a benchmark directory |
 | `tasks/` | Six reproducible bug-fix tasks with failure scenarios |
 | `docs/` | Architecture diagram, 3-minute demo script, results and limitations summary |
 
@@ -125,7 +146,9 @@ Defaults in `config.Budget`, overridable on the CLI (`--budget-usd`, `--max-atte
 `results/<id>/` contains `traces.jsonl` (the source of truth), `raw.sqlite`, `runs.csv`,
 `metrics.json`, `metrics.csv` and `manifest.json` (modes, provenance labels, budgets, model
 tiers, package versions, git commit). `python benchmark.py --recompute results/<id>`
-re-derives the metrics from the raw traces and fails on any mismatch.
+re-derives the metrics from the raw traces and fails on any mismatch. Then run
+`python scripts/integrity_audit.py results/<id>` to compute clean successes; the dashboard uses
+them automatically when `integrity.json` exists.
 
 Reported metrics, per strategy and per strategy × scenario: verified completion rate; total,
 LLM and Jev cost; average cost per success; successes per dollar; successes per dollar

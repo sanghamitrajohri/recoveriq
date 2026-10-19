@@ -59,13 +59,24 @@ class RuleBased:
 
 
 class RecoverIQ:
-    """C. Jev-guided recovery. Jev ranks the available actions; the policy enforces constraints."""
+    """C. Jev-guided recovery. Jev ranks the available actions; the policy enforces constraints.
+
+    With ``gate_retry`` (the default), Jev's own Noul answer is used as a consistency check: if
+    Jev picks ``retry`` but rates "retrying unchanged is likely to succeed" below
+    ``retry_threshold``, the next-ranked action is taken instead. Added after the first live
+    call (2026-10-19), where Jev picked retry for an output-truncation failure while rating
+    retry_would_help at 0.19. ``recoveriq_raw`` keeps the ungated behavior as an ablation.
+    """
 
     name = "recoveriq"
     uses_jev = True
 
-    def __init__(self, adapter: JevAdapter) -> None:
+    def __init__(self, adapter: JevAdapter, gate_retry: bool = True, retry_threshold: float = 0.3) -> None:
         self.adapter = adapter
+        self.gate_retry = gate_retry
+        self.retry_threshold = retry_threshold
+        if not gate_retry:
+            self.name = "recoveriq_raw"
         self._fallback = RuleBased()
         self.last_decision: JevDecision | None = None
 
@@ -79,11 +90,20 @@ class RecoverIQ:
             return Proposal(p.action, "jev_unavailable_fallback", f"Jev call failed ({e}); used rule-based",
                             ranked=p.ranked, detail={"jev_error": str(e)})
         self.last_decision = d
+        action, ranked = d.action, d.ranked_actions()
         why = (f"Jev[{d.source}] chose {d.action}"
                + (f" (confidence {d.confidence:.2f})" if d.confidence is not None else "")
                + f"; failure type: {d.failure_type}")
-        return Proposal(d.action, "jev" if d.source == "typesafe" else "jev_mock", why,
-                        ranked=d.ranked_actions(), confidence=d.confidence, detail=d.to_dict())
+        if (self.gate_retry and action == RETRY and d.retry_would_help is not None
+                and d.retry_would_help < self.retry_threshold):
+            alternatives = [a for a in ranked if a != RETRY]
+            if alternatives:
+                action = alternatives[0]
+                ranked = alternatives + [RETRY]
+                why += (f"; retry gate: Jev rates retry_would_help={d.retry_would_help:.2f} "
+                        f"< {self.retry_threshold}, so using Jev's next choice {action}")
+        return Proposal(action, "jev" if d.source == "typesafe" else "jev_mock", why,
+                        ranked=ranked, confidence=d.confidence, detail=d.to_dict())
 
 
 def make_strategy(name: str, jev_mode: str = "mock", jev_model: str = "jev-latest"):
@@ -93,7 +113,9 @@ def make_strategy(name: str, jev_mode: str = "mock", jev_model: str = "jev-lates
         return RuleBased()
     if name == "recoveriq":
         return RecoverIQ(JevAdapter(jev_mode, jev_model))
+    if name == "recoveriq_raw":
+        return RecoverIQ(JevAdapter(jev_mode, jev_model), gate_retry=False)
     raise ValueError(f"unknown strategy {name!r}")
 
 
-STRATEGY_NAMES = ("fixed_retry", "rule_based", "recoveriq")
+STRATEGY_NAMES = ("fixed_retry", "rule_based", "recoveriq_raw", "recoveriq")
