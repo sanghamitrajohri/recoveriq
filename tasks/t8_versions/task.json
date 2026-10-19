@@ -1,0 +1,11 @@
+{
+  "id": "t8_versions",
+  "title": "Semantic version comparison (capability gap)",
+  "description": "is_newer('1.10.0', '1.9.3') returns False. Fix versions.py so versions compare numerically per component and all tests pass.",
+  "target_file": "versions.py",
+  "scenario": "capability_gap",
+  "scenario_note": "The cheap model repeatedly proposes a plausible but wrong fix; only the strong tier gets it right. Escalating after the first failure is cheaper than retrying first.",
+  "fault": {"type": "none"},
+  "human_hint": "Compare tuples of ints, e.g. tuple(int(p) for p in v.split('.')), padding missing components with 0.",
+  "simulator": {"cheap": "naive", "strong": "fixed"}
+}

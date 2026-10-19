@@ -1,0 +1,11 @@
+{
+  "id": "t1_median",
+  "title": "Median of even-length lists",
+  "description": "median() returns the wrong value for lists with an even number of elements. Fix it so all tests pass.",
+  "target_file": "stats.py",
+  "scenario": "transient_api_error",
+  "scenario_note": "The LLM provider returns an overloaded error on the first two calls (injected fault). Retrying the same call is the cheapest correct recovery.",
+  "fault": {"type": "transient_llm_error", "calls": 2},
+  "human_hint": "Nothing unusual: average the two middle values for even-length input.",
+  "simulator": {"cheap": "fixed", "strong": "fixed"}
+}

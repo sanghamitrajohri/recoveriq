@@ -1,0 +1,11 @@
+{
+  "id": "t9_chunks",
+  "title": "List chunking (edge case a stronger model can infer)",
+  "description": "chunk(items, size) drops the last partial chunk. Fix chunks.py so all tests pass. size must be a positive integer; anything else is a ValueError.",
+  "target_file": "chunks.py",
+  "scenario": "inferable_edge_case",
+  "scenario_note": "Visible tests pass after a naive fix but hidden acceptance tests check the size validation stated in the description. A stronger model handles it; asking a human works too but costs human time.",
+  "fault": {"type": "none"},
+  "human_hint": "Raise ValueError when size is not a positive int (the description says so).",
+  "simulator": {"cheap": "naive", "strong": "fixed", "with_hint": "fixed"}
+}

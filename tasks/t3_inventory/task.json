@@ -1,0 +1,11 @@
+{
+  "id": "t3_inventory",
+  "title": "Inventory reorder report",
+  "description": "items_to_reorder() flags the wrong items: an item must be reordered when on-hand stock is at or below its reorder point. Fix inventory.py so all tests pass.",
+  "target_file": "inventory.py",
+  "scenario": "output_truncation",
+  "scenario_note": "inventory.py is long. The cheap tier is configured with a 1024-token output cap (cost guard), so a full-file rewrite is truncated. Retrying the cheap model repeats the truncation; switching to the strong tier fixes it.",
+  "fault": {"type": "none"},
+  "human_hint": "The comparison in items_to_reorder should be <=, not >.",
+  "simulator": {"cheap": "truncate", "strong": "fixed"}
+}

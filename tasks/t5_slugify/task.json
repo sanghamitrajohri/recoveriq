@@ -1,0 +1,11 @@
+{
+  "id": "t5_slugify",
+  "title": "URL slug generation (contradictory spec)",
+  "description": "slugify() produces slugs that fail the tests. Fix slugify.py so all tests pass.",
+  "target_file": "slugify.py",
+  "scenario": "contradictory_spec",
+  "scenario_note": "Two visible tests demand opposite handling of underscores, so no implementation can pass. Every further attempt is wasted spend; terminating early is optimal.",
+  "fault": {"type": "none"},
+  "human_hint": "The two underscore tests contradict each other; product has not decided yet. Stop and file a ticket.",
+  "simulator": {"cheap": "alternate", "strong": "alternate"}
+}

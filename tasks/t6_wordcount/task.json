@@ -1,0 +1,11 @@
+{
+  "id": "t6_wordcount",
+  "title": "Top-N word frequency (control)",
+  "description": "top_words(text, n) returns one word too few. Fix wordfreq.py so all tests pass.",
+  "target_file": "wordfreq.py",
+  "scenario": "clean",
+  "scenario_note": "Control task with no injected fault: a single cheap-model attempt should succeed. Measures each strategy's overhead.",
+  "fault": {"type": "none"},
+  "human_hint": "Slice with [:n], not [:n-1].",
+  "simulator": {"cheap": "fixed", "strong": "fixed"}
+}

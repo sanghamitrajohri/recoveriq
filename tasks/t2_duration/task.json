@@ -1,0 +1,11 @@
+{
+  "id": "t2_duration",
+  "title": "Duration string parser",
+  "description": "parse_duration('1h30m') should return seconds. Minutes are being converted with the wrong unit. Fix duration.py so all tests pass.",
+  "target_file": "duration.py",
+  "scenario": "workspace_corruption",
+  "scenario_note": "During the first attempt a rogue tool write truncates the helper module units.py (injected fault). The agent may only edit duration.py, so retries keep failing until the workspace is restored from a checkpoint.",
+  "fault": {"type": "corrupt_file", "file": "units.py", "on_attempt": 1, "content": "SECONDS_PER_MINUTE = 60\nSECONDS_PER_HOUR = (\n"},
+  "human_hint": "units.py looks damaged; restore it from version control.",
+  "simulator": {"cheap": "fixed", "strong": "fixed"}
+}

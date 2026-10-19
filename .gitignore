@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+runs/
+results/*
+!results/README.md
+.pytest_cache/
+.DS_Store

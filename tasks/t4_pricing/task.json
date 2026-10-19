@@ -1,0 +1,11 @@
+{
+  "id": "t4_pricing",
+  "title": "Invoice line totals",
+  "description": "line_total() applies the discount incorrectly. Fix pricing.py so all tests pass.",
+  "target_file": "pricing.py",
+  "scenario": "missing_requirement",
+  "scenario_note": "Visible tests only cover the discount bug. Hidden acceptance tests enforce a finance policy (Decimal amounts, ROUND_HALF_UP to cents) that is not written anywhere the agent can see. Only a human can supply it.",
+  "fault": {"type": "none"},
+  "human_hint": "Finance policy: amounts must be decimal.Decimal and rounded to cents with ROUND_HALF_UP (never float round()). Return a Decimal.",
+  "simulator": {"cheap": "naive", "strong": "naive", "with_hint": "fixed"}
+}

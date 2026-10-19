@@ -1,0 +1,11 @@
+{
+  "id": "t7_temperature",
+  "title": "Temperature conversion (silent helper corruption)",
+  "description": "to_kelvin() is slightly off. Fix convert.py so all tests pass. Conversion constants live in constants.py and must not be duplicated.",
+  "target_file": "convert.py",
+  "scenario": "silent_corruption",
+  "scenario_note": "During attempt 1 an injected write changes a value in constants.py (still valid Python). Tests fail with assertion errors, not import errors, so error-type rules don't see damage; the workspace diff does. Restoring the checkpoint is required.",
+  "fault": {"type": "corrupt_file", "file": "constants.py", "on_attempt": 1, "content": "\"\"\"Physical conversion constants.\"\"\"\n\nF_PER_C = 1.6\nF_OFFSET = 32.0\nK_OFFSET = 273.15\n"},
+  "human_hint": "constants.py was modified (F_PER_C should be 1.8). Restore it from version control.",
+  "simulator": {"cheap": "fixed", "strong": "fixed"}
+}
