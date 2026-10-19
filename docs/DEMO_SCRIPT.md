@@ -4,7 +4,9 @@ Every number here comes from the live benchmark `results/live-2026-10-19`: 108 r
 Claude and real Jev calls, $2.41 total. Setup and fallbacks: `docs/DEMO_CHEATSHEET.md`.
 
 **On screen before you start:** the dashboard (`streamlit run app.py`) at 125% zoom with green
-LIVE badges, plus `docs/examples/reward_hack_slugify.py` open in a second window.
+LIVE badges, the sidebar already set to **t7_temperature**, and the **🏁 Live race** tab open.
+Have `docs/examples/reward_hack_slugify.py` open in a second window. Each race costs about
+$0.15, so rehearsing 5 times costs well under $1.
 
 ---
 
@@ -15,23 +17,27 @@ LIVE badges, plus `docs/examples/reward_hack_slugify.py` open in a second window
 > TypeSafe's decision model. It answers typed questions with probabilities, not prose, and a
 > plain-code budget policy sits on top that Jev can't override."
 
-### 0:20–1:05 — Live moment: damage the rules can't see (`t7_temperature`)
-Sidebar → **t7_temperature · silent_corruption**, strategy **RecoverIQ (Jev + gate)** → **Run**.
-It takes about 5 seconds.
+### 0:20–1:05 — LIVE: the race (`t7_temperature`, 🏁 Live race tab)
+Sidebar → **t7_temperature · silent_corruption** → **🏁 Live race** tab → **Start race**.
+Three strategies now run *at the same time* with real Claude and real Jev calls. In rehearsal
+RecoverIQ finished at 5 s, fixed retry at 37 s, and rule-based at 72 s.
 
-> "While the agent was working, something quietly changed a constant in a helper file. It's
-> still valid Python, so the tests fail like any ordinary bug."
+> "Same broken task, same budget, three strategies racing, all live. While the agent was
+> working, something quietly changed a constant in a helper file. It's still valid Python, so
+> the tests fail like any ordinary bug."
 
-When the trace appears, point at the blue Jev box:
-> "Jev diagnoses `workspace_damaged` and recommends `restore_checkpoint`" — **read the
-> confidence off the screen**; it was 0.97 in rehearsal — "the policy approves it, we restore
-> a real snapshot with every file hash verified, and the cheap model fixes the bug. Verified,
-> including hidden tests, for a quarter of a cent."
+**~5 s:** RecoverIQ flips to ✅ **SOLVED**. Point at its 🧠 line:
+> "Jev diagnosed `workspace_damaged` and said restore the checkpoint. The policy approved it,
+> we restored a real snapshot with every hash verified, and the cheap model fixed the bug.
+> Done, for a quarter of a cent."
 
-> "Our hand-written rule-based baseline **failed this task in all 3 runs** and burned
-> **$0.36** escalating to Opus and asking humans. Jev went 3 for 3 at **$0.007**."
+Point at the other two columns, still ⏳ working, with their budget bars filling:
+> "Fixed retry keeps paying for the same mistake. The rule-based system is escalating to Opus,
+> the expensive model, because to a rule this just looks like a hard bug. They'll both give
+> up. Let's not wait."
 
 ### 1:05–1:45 — The model cheated (`reward_hack_slugify.py`)
+*(While the race finishes in the background.)*
 Switch to the code window.
 > "Task 5 has two tests that contradict each other: it's impossible by design. Watch what
 > Claude Opus did. It returned a fake string whose equality check treats hyphens and
@@ -44,6 +50,10 @@ Point at `def __eq__`.
 > impossible' and stopped."
 
 ### 1:45–2:40 — The numbers
+Back to the browser: the race is over. Point at the final banner, **"Cheapest verified fix:
+RecoverIQ"**, and the two ❌ columns (rehearsal: $0.021 and $0.126 spent, both failed).
+> "That was one race. Here are 108 of them."
+
 **Benchmark results** tab (the `live-2026-10-19` run is preselected).
 > "108 real runs across nine tasks and four strategies, all with the same budgets."
 

@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import json
+import threading
+import time
 from pathlib import Path
 
 import altair as alt
@@ -62,7 +64,7 @@ with st.sidebar:
 
 task = tasks[task_id]
 
-tab_run, tab_compare, tab_bench = st.tabs(["Live run", "Side-by-side on this task", "Benchmark results"])
+tab_race, tab_run, tab_compare, tab_bench = st.tabs(["🏁 Live race", "Live run", "Side-by-side on this task", "Benchmark results"])
 
 
 # ----------------------------------------------------------------------------- live run
@@ -267,3 +269,84 @@ with tab_bench:
         if runs_csv.exists():
             with st.expander("Raw runs"):
                 st.dataframe(pd.read_csv(runs_csv), hide_index=True, width="stretch")
+
+
+# ----------------------------------------------------------------------------- live race
+RACERS = ("fixed_retry", "rule_based", "recoveriq")
+
+
+def render_racer(box, name: str, run: RecoveryRun, finished_s: float | None, elapsed_s: float, error: str | None) -> None:
+    """Draw one racer from its cost ledger (append-only, safe to read while the run's thread works)."""
+    events = list(run.rc.tracker.events)
+    attempts = [e for e in events if e.kind == "llm_attempt"]
+    spent = sum(e.cost_usd for e in events)
+    status = (run.state.get("status", "running") if finished_s is not None else "running")
+    with box.container(border=True):
+        st.markdown(f"<span style='color:{COLORS[name]};font-size:1.3rem'>●</span> **{LABELS[name]}**",
+                    unsafe_allow_html=True)
+        if error:
+            st.error(f"crashed: {error}")
+        elif finished_s is None:
+            st.markdown(f"### ⏳ working… {elapsed_s:.0f}s")
+        elif status == "success":
+            st.markdown(f"### ✅ SOLVED in {finished_s:.0f}s")
+        else:
+            st.markdown(f"### ❌ GAVE UP after {finished_s:.0f}s")
+        m1, m2 = st.columns(2)
+        m1.metric("Attempts", len(attempts))
+        m2.metric("Spent", f"${spent:.4f}")
+        st.progress(min(spent / run.rc.budget.max_cost_usd, 1.0), text=f"budget used of ${run.rc.budget.max_cost_usd:.2f}")
+        for e in events[-7:]:
+            if e.kind == "llm_attempt":
+                st.caption(f"{STATUS_ICONS.get(e.outcome, '•')} attempt {e.attempt} · `{e.model}` · {e.outcome}")
+            elif e.kind == "jev_decision":
+                conf = e.detail.get("confidence")
+                st.caption(f"🧠 Jev → **{e.recovery_action}**" + (f" ({conf:.2f})" if conf is not None else "")
+                           + f" · {e.detail.get('failure_type')}")
+            elif e.kind == "recovery_action":
+                flag = " (override)" if e.outcome == "override" else ""
+                st.caption(f"{ACTION_ICONS.get(e.recovery_action, '•')} {e.recovery_action}{flag}")
+
+
+with tab_race:
+    st.subheader(f"🏁 Live race on `{task.id}`")
+    st.caption(f"**{task.scenario}:** {task.scenario_note}")
+    st.caption("Same task, same budget, all strategies at once. Each press makes real API calls when the "
+               "badges are LIVE (about $0.05–0.25 per race). Human escalations get the simulated reply.")
+    if st.button("🏁 Start race", type="primary"):
+        runs = {n: RecoveryRun(task, make_strategy(n, settings.jev_mode, settings.jev_model), settings, budget,
+                               run_root=RUNS_DIR / "race", human_available=human_ok) for n in RACERS}
+        errors: dict[str, str] = {}
+
+        def _go(name: str, run: RecoveryRun) -> None:
+            try:
+                run.run(human=scripted_human(task))
+            except Exception as e:  # shown in the racer's card; never hidden
+                errors[name] = f"{type(e).__name__}: {e}"
+
+        threads = {n: threading.Thread(target=_go, args=(n, r), daemon=True) for n, r in runs.items()}
+        start = time.perf_counter()
+        for t in threads.values():
+            t.start()
+        boxes = dict(zip(RACERS, (c.empty() for c in st.columns(len(RACERS)))))
+        finished: dict[str, float] = {}
+        while True:
+            now = time.perf_counter() - start
+            for n, r in runs.items():
+                if not threads[n].is_alive() and n not in finished:
+                    finished[n] = now
+                render_racer(boxes[n], n, r, finished.get(n), now, errors.get(n))
+            if len(finished) == len(runs):
+                break
+            time.sleep(0.5)
+        st.session_state.race = (task.id, runs, finished, errors)
+        st.rerun()
+    if st.session_state.get("race") and st.session_state.race[0] == task.id:
+        _, runs, finished, errors = st.session_state.race
+        for box, n in zip((c.empty() for c in st.columns(len(RACERS))), RACERS):
+            render_racer(box, n, runs[n], finished[n], finished[n], errors.get(n))
+        winners = [n for n in RACERS if runs[n].state.get("status") == "success"]
+        if winners:
+            best = min(winners, key=lambda n: runs[n].rc.tracker.spent_usd)
+            st.success(f"Cheapest verified fix: **{LABELS[best]}** at ${runs[best].rc.tracker.spent_usd:.4f}"
+                       + ("" if runs[best].rc.tracker.all_measured() else "  (simulated costs)"))

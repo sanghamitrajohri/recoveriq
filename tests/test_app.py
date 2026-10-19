@@ -32,3 +32,13 @@ def test_human_escalation_pause_and_resume(app):
     next(b for b in app.button if b.label == "Resume with guidance").click().run()
     assert not app.exception
     assert "VERIFIED SUCCESS" in " ".join(m.value for m in app.markdown)
+
+
+def test_live_race_runs_all_strategies(app):
+    # t3 offline: fixed retry gives up (truncation); rule-based and RecoverIQ switch model and solve it.
+    app.sidebar.selectbox[0].select_index(2)
+    next(b for b in app.button if b.label == "🏁 Start race").click().run(timeout=120)
+    assert not app.exception
+    text = " ".join(m.value for m in app.markdown)
+    assert "SOLVED" in text and "GAVE UP" in text
+    assert any("Cheapest verified fix" in s.value for s in app.success)

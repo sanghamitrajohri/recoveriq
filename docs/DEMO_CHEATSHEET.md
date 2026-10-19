@@ -13,7 +13,8 @@ cd ~/Desktop/recoveriq
 ```
 - [ ] Browser opens at http://localhost:8501. Zoom to 125% (Cmd +) so the back row can read it.
 - [ ] Sidebar badges are **green**: "LLM: LIVE Anthropic" and "Jev: LIVE TypeSafe".
-- [ ] Run **t6_wordcount** once as a warm-up, so the first call isn't on stage.
+- [ ] Warm-up: pick **t6_wordcount**, press **Run agent** on the Live run tab (seconds, about $0.001).
+- [ ] Then set the sidebar to **t7_temperature** and open the **🏁 Live race** tab. That's your starting screen.
 - [ ] Open the **Benchmark results** tab once and check that `live-2026-10-19` is selected.
 
 ## If something breaks on stage
@@ -21,6 +22,7 @@ cd ~/Desktop/recoveriq
 |---|---|
 | Wi-Fi is down or an API errors | Stop Streamlit (Ctrl-C) and run `RECOVERIQ_LLM_MODE=scripted RECOVERIQ_JEV_MODE=mock .venv/bin/streamlit run app.py`. Say: *"Offline mode now, so these numbers are simulated; the real ones are in the benchmark tab."* |
 | A run is slow (Opus takes ~20–30 s) | Talk through the Jev box and the probabilities while it runs |
+| The race shows a different winner or Jev picks another action | Narrate what happened honestly, then show the benchmark tab: 108 runs matter more than one |
 | The page freezes | Refresh the browser tab; the saved benchmark tab still works |
 | The laptop dies | Show `docs/SUMMARY.md` on another device |
 
