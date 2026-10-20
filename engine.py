@@ -279,13 +279,26 @@ class RecoveryRun:
         return self.graph.get_state(self.config).values
 
     # -- blocking API (benchmark / CLI) -----------------------------------------------------
-    def run(self, human: Callable[[dict], str] | None = None) -> RunState:
+    def run(self, human: Callable[[dict], str] | None = None,
+            on_item: Callable[["RecoveryRun", dict], None] | None = None) -> RunState:
+        """Run to completion. ``on_item`` (optional) is called with each new trace item as it happens."""
+        seen = 0
+
+        def emit() -> None:
+            nonlocal seen
+            if on_item is None:
+                return
+            trace = self.state.get("trace", [])
+            for item in trace[seen:]:
+                on_item(self, item)
+            seen = len(trace)
+
         for _ in self.stream():
-            pass
+            emit()
         while (payload := self.pending_interrupt()) is not None:
             answer = human(payload) if human else ""
             for _ in self.stream(resume_value=answer):
-                pass
+                emit()
         return self.state
 
     def summary(self, benchmark_id: str = "", human_cost_usd: float = 0.0) -> dict:

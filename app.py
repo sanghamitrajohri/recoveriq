@@ -15,6 +15,7 @@ from benchmark import aggregate
 from config import RESULTS_DIR, RUNS_DIR, Budget, Settings
 from engine import RecoveryRun, scripted_human
 from integrity import audit
+from narrate import ACTION_PLAIN, SOURCE_PLAIN, STATUS_PLAIN, c, printer, sabotage_diff
 from strategies import STRATEGY_NAMES, make_strategy
 
 st.set_page_config(page_title="RecoverIQ", page_icon="🛟", layout="wide")
@@ -106,6 +107,61 @@ def burn_chart(run: RecoveryRun) -> alt.Chart | None:
     return line.properties(height=220)
 
 
+def explain_steps(run: RecoveryRun) -> list[str]:
+    """Plain-English, numbered story of one run, built only from its recorded trace and cost ledger."""
+    jev_seen = iter([e.detail.get("state", {}) for e in run.rc.tracker.events if e.kind == "jev_decision"])
+    lines, n = [], 0
+    for item in run.state.get("trace", []):
+        kind = item["kind"]
+        if kind == "attempt":
+            n += 1
+            icon = STATUS_ICONS.get(item["status"], "•")
+            lines.append(f"**{n}. {icon} Attempt {item['attempt']}** with `{item['model']}`: "
+                         f"{STATUS_PLAIN.get(item['status'], item['status'])} "
+                         + (f"({item['passed']}/{item['total']} tests passed, " if item.get("total") else "(")
+                         + f"${item['cost_usd']:.4f}).")
+            if item["status"] != "success" and item["summary"]:
+                lines.append(f"&nbsp;&nbsp;&nbsp;&nbsp;Test output: `{item['summary'][:160]}`")
+            for f in item.get("injected_faults", []):
+                what = f.split(":", 1)
+                lines.append(f"&nbsp;&nbsp;&nbsp;&nbsp;🧪 *Injected on purpose:* "
+                             + (f"`{what[1]}` was quietly edited while the agent worked." if what[0] == "corrupt_file"
+                                else f"{f}."))
+        elif kind == "jev":
+            n += 1
+            seen = next(jev_seen, {})
+            damaged = seen.get("files_damaged_since_last_good_checkpoint")
+            probs = " · ".join(f"{a} **{p:.2f}**" for a, p in sorted(item["probabilities"].items(), key=lambda kv: -kv[1]))
+            src = "LIVE" if item["source"] == "typesafe" else "MOCK, not real Jev"
+            lines.append(f"**{n}. 🧠 Asked Jev** ({src}, {item['latency_s'] * 1000:.0f} ms, ${item['cost_usd']:.5f}).")
+            if seen:
+                lines.append("&nbsp;&nbsp;&nbsp;&nbsp;Jev was told: failure = `" + str(seen.get("latest_failure_type"))
+                             + "`, files changed that the agent may not touch = "
+                             + (", ".join(f"`{d}`" for d in damaged) if damaged else "none")
+                             + f", budget left ${seen.get('remaining_budget_usd', 0):.4f}.")
+            lines.append(f"&nbsp;&nbsp;&nbsp;&nbsp;*What should we do?* {probs}")
+            extra = [f"*Why did it fail?* `{item['failure_type']}`"]
+            if item.get("retry_would_help") is not None:
+                extra.append(f"*Will a retry help?* {item['retry_would_help']:.2f}")
+            if item.get("impossible") is not None:
+                extra.append(f"*Is it impossible?* {item['impossible']:.2f}")
+            lines.append("&nbsp;&nbsp;&nbsp;&nbsp;" + " · ".join(extra))
+        elif kind == "decision":
+            n += 1
+            who = SOURCE_PLAIN.get(item["proposal_source"], item["proposal_source"])
+            verdict = (f"⚠️ the budget policy **overrode** it: {item['policy_reason']}" if item["overridden"]
+                       else f"✔ the budget policy approved it (est. ${item['est_cost_usd']:.4f}, "
+                            f"${item['remaining_usd']:.4f} left)")
+            lines.append(f"**{n}. 📋 Decision:** {who} proposed **{item['proposed']}**; {verdict}.")
+            if item.get("rationale"):
+                lines.append(f"&nbsp;&nbsp;&nbsp;&nbsp;Reason given: *{item['rationale'][:220]}*")
+        elif kind == "action":
+            n += 1
+            lines.append(f"**{n}. {ACTION_ICONS.get(item['action'], '•')} "
+                         f"{ACTION_PLAIN.get(item['action'], item['action']).capitalize()}:** {item['detail']}.")
+    return lines
+
+
 with tab_run:
     st.subheader(f"{task.title}")
     st.caption(f"**Scenario — {task.scenario}:** {task.scenario_note}")
@@ -114,6 +170,8 @@ with tab_run:
                                            settings, budget, run_root=RUNS_DIR / "dashboard", human_available=human_ok)
         st.session_state.resume = None
         st.session_state.started = False
+        st.session_state.printed = 0
+        print("\n" + c(f"━━━ LIVE RUN: {LABELS[strategy_name]} on {task.id}: {task.title} ━━━", "bold"), flush=True)
     run: RecoveryRun | None = st.session_state.get("run")
     if run is None:
         st.write("Pick a task and strategy, then press **Run agent**.")
@@ -126,9 +184,16 @@ with tab_run:
                 resume = st.session_state.resume
                 st.session_state.started, st.session_state.resume = True, None
                 with st.spinner("Agent running…"):
+                    say = printer("[RUN ] ")
                     for _ in run.stream(resume_value=resume):
-                        render_trace(trace_box, run.state.get("trace", []))
+                        trace = run.state.get("trace", [])
+                        for item in trace[st.session_state.get("printed", 0):]:
+                            say(run, item)
+                        st.session_state.printed = len(trace)
+                        render_trace(trace_box, trace)
             render_trace(trace_box, run.state.get("trace", []))
+            with st.expander("🔍 Step by step, in plain words", expanded=True):
+                st.markdown("  \n".join(explain_steps(run)) or "Nothing yet.")
             payload = run.pending_interrupt()
             if payload:
                 st.warning(f"🙋 **Human escalation — execution paused.** {payload['question']}\n\n"
@@ -318,14 +383,33 @@ with tab_race:
     st.caption(f"**{task.scenario}:** {task.scenario_note}")
     st.caption("Same task, same budget, all strategies at once. Each press makes real API calls when the "
                "badges are LIVE (about $0.05–0.25 per race). Human escalations get the simulated reply.")
+    with st.expander("🔍 What's broken here (so you can follow along)"):
+        st.markdown(f"**The agent's job:** {task.description}  \n**Allowed to edit:** only `{task.target_file}`")
+        diff = sabotage_diff(task)
+        if diff:
+            st.markdown("**The sabotage, injected after the first attempt:**")
+            st.code(diff, language="diff")
+        st.markdown("**The five possible next moves after a failure:** "
+                    + " · ".join(f"{ACTION_ICONS[a]} {ACTION_PLAIN[a]}" for a in ACTION_PLAIN))
     if st.button("🏁 Start race", type="primary"):
         runs = {n: RecoveryRun(task, make_strategy(n, settings.jev_mode, settings.jev_model), settings, budget,
                                run_root=RUNS_DIR / "race", human_available=human_ok) for n in RACERS}
         errors: dict[str, str] = {}
 
+        tag = {"fixed_retry": "RETRY", "rule_based": "RULES", "recoveriq": "RIQ  "}
+        print("\n" + c(f"━━━ LIVE RACE on {task.id}: {task.title} ━━━", "bold"), flush=True)
+
         def _go(name: str, run: RecoveryRun) -> None:
+            prefix = f"[{tag[name]}] "
+
+            def human(payload: dict) -> str:
+                print(prefix + c(f"ASK A PERSON: {payload['question']} (simulated reply: {task.human_hint})",
+                                 "yellow"), flush=True)
+                return task.human_hint
             try:
-                run.run(human=scripted_human(task))
+                run.run(human=human, on_item=printer(prefix))
+                print(prefix + c(f"FINISHED: {run.state.get('status')} · ${run.rc.tracker.spent_usd:.4f}", "bold"),
+                      flush=True)
             except Exception as e:  # shown in the racer's card; never hidden
                 errors[name] = f"{type(e).__name__}: {e}"
 
@@ -356,3 +440,12 @@ with tab_race:
             best = min(winners, key=lambda n: runs[n].rc.tracker.spent_usd)
             st.success(f"Cheapest clean fix: **{LABELS[best]}** at ${runs[best].rc.tracker.spent_usd:.4f}"
                        + ("" if runs[best].rc.tracker.all_measured() else "  (simulated costs)"))
+        st.markdown("#### 🔍 Step by step: why each strategy did what it did")
+        for tab, n in zip(st.tabs([LABELS[n] for n in reversed(RACERS)]), reversed(RACERS)):
+            with tab:
+                st.markdown("  \n".join(explain_steps(runs[n])))
+                if runs[n].state.get("status") == "success":
+                    check = audit(task, runs[n].rc.workspace)
+                    st.markdown("**🕵️ Inspector:** " + ("clean fix, nothing gamed or damaged." if check["clean"] else
+                                "tests passed, but flagged: " + ", ".join(
+                                    check["gaming"] + [f"damaged `{f}`" for f in check["damaged"]]) + "."))
