@@ -142,11 +142,6 @@ footer { color: var(--muted); font-size: 0.88rem; border-top: 1px solid var(--ru
   <div class="eyebrow">AI Tinkerers demo · live results, 19 Oct 2026</div>
   <h1>RecoverIQ</h1>
   <p class="lede">When an AI coding agent fails, someone has to decide what happens next: try again, call a bigger model, roll back the files, ask a person, or stop. RecoverIQ makes that call with TypeSafe's <strong>Jev</strong> decision model and checks it against a hard budget.</p>
-  <div class="stats">
-    <div class="stat"><b>42.9</b><span>clean fixes per dollar, against 25.3 for hand-written rules and 31.3 for plain retry</span></div>
-    <div class="stat"><b>3 of 3</b><span>silent-corruption runs fixed by Jev for $0.007 in total. The rules fixed 0 of 3 and spent $0.36.</span></div>
-    <div class="stat"><b>108 runs</b><span>real Claude and real Jev calls, $2.41 in total. Every number recomputes from the raw logs.</span></div>
-  </div>
 </header>
 
 <!-- PLAIN WORDS -->
@@ -517,24 +512,5 @@ def slugify(title: str) -> str:
     <li>The gaming check is a heuristic. It catches the patterns we saw and could miss others.</li>
   </ul>
 </section>
-
-<!-- REPRODUCE -->
-<section aria-labelledby="repro">
-  <div class="eyebrow">Run it yourself</div>
-  <h2 id="repro">Reproduce on a Mac</h2>
-  <p>Python 3.11, no GPU. Without API keys everything runs offline with a clearly labeled simulator.</p>
-<pre>python3.11 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python -m pytest                          # 62 tests, offline
-cp .env.example .env                                # add ANTHROPIC_API_KEY and TYPESAFE_API_KEY
-.venv/bin/python scripts/verify_live.py             # first real Jev and Claude calls
-.venv/bin/python benchmark.py --llm-mode live --jev-mode live --repeats 3
-.venv/bin/python scripts/integrity_audit.py results/&lt;run&gt;
-.venv/bin/streamlit run app.py                      # dashboard and live race</pre>
-</section>
-
-<footer>
-  <div>RecoverIQ · built with Claude (Haiku 4.5, Opus 5), TypeSafe Jev (jev-1.13.0), LangGraph and Streamlit.</div>
-  <div>All figures come from <code>results/live-2026-10-19</code>, which recomputes exactly from its raw traces. The race timeline is from a single rehearsal run on the same day.</div>
-</footer>
 
 </main>
