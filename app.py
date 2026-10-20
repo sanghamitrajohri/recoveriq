@@ -15,7 +15,7 @@ from benchmark import aggregate
 from config import RESULTS_DIR, RUNS_DIR, Budget, Settings
 from engine import RecoveryRun, scripted_human
 from integrity import audit
-from narrate import (ACTION_PLAIN, SOURCE_PLAIN, STATUS_PLAIN, NO_FIX, bug_lines, c, jev_verdict, printer,
+from narrate import (ACTION_PLAIN, SOURCE_PLAIN, STATUS_PLAIN, NO_FIX, bug_lines, c, jev_verdict, keep_awake, printer,
                      sabotage_diff, saved_results)
 from strategies import STRATEGY_NAMES, make_strategy
 
@@ -44,6 +44,9 @@ def badge(text: str, live: bool) -> str:
 
 settings = Settings()
 tasks = {t.id: t for t in list_tasks()}
+if not st.session_state.get("awake"):  # once per browser session; caffeinate exits with the app
+    keep_awake()
+    st.session_state.awake = True
 
 # ----------------------------------------------------------------------------- sidebar
 with st.sidebar:

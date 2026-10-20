@@ -20,7 +20,7 @@ from config import RESULTS_DIR, RUNS_DIR, Budget, Settings  # noqa: E402
 from engine import RecoveryRun, console_human, scripted_human  # noqa: E402
 from integrity import audit  # noqa: E402
 from narrate import (ACTION_PLAIN, agent_change, c, code_listing, hidden_test_count, printer,  # noqa: E402
-                     jev_vs_without, sabotage_diff, saved_results, styled, visible_tests)  # noqa: E402
+                     jev_vs_without, keep_awake, sabotage_diff, saved_results, styled, visible_tests)  # noqa: E402
 from strategies import make_strategy  # noqa: E402
 
 LABELS = {"recoveriq": "RecoverIQ (Jev + gate)", "recoveriq_raw": "Jev only (no gate)",
@@ -39,6 +39,7 @@ def main() -> None:
     ap.add_argument("--interactive", action="store_true")
     args = ap.parse_args()
     settings, task, budget = Settings(), Task.load(args.task), Budget()
+    keep_awake()
 
     rule("RecoverIQ: what should a coding agent do after it fails?")
     for k, v in provenance(settings).items():

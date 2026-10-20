@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import random
+import threading
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -67,6 +68,28 @@ class AnthropicLLM:
         self._anthropic = anthropic
         # Retries are the recovery controller's job, so SDK auto-retry is disabled.
         self.client = client or anthropic.Anthropic(max_retries=0, timeout=120.0)
+        self.deadline_s = 90.0
+
+    def _create_with_deadline(self, kwargs: dict, model: str):
+        """messages.create with a hard wall-clock limit. The SDK timeout only bounds the gap between bytes,
+        and we have seen a live call hang for 30+ minutes; past the deadline it counts as a transient error."""
+        box: dict = {}
+
+        def call() -> None:
+            try:
+                box["resp"] = self.client.messages.create(**kwargs)
+            except BaseException as e:  # re-raised in the caller's thread
+                box["err"] = e
+
+        worker = threading.Thread(target=call, daemon=True)
+        worker.start()
+        worker.join(self.deadline_s)
+        if worker.is_alive():
+            raise LLMError("transient", f"no response from the API within {self.deadline_s:.0f}s (hard deadline)",
+                           model=model)
+        if "err" in box:
+            raise box["err"]
+        return box["resp"]
 
     def generate(self, prompt: str, tier: ModelTier, sim: SimContext | None = None) -> LLMResponse:
         a = self._anthropic
@@ -82,7 +105,7 @@ class AnthropicLLM:
             kwargs["output_config"] = {"effort": tier.effort}
         start = time.perf_counter()
         try:
-            resp = self.client.messages.create(**kwargs)
+            resp = self._create_with_deadline(kwargs, tier.model)
         except (a.RateLimitError, a.APIConnectionError, a.APITimeoutError, a.InternalServerError) as e:
             raise LLMError("transient", f"{type(e).__name__}: {e}", model=tier.model) from e
         except a.AuthenticationError as e:

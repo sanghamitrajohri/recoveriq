@@ -27,6 +27,15 @@ _COLOR = sys.stdout.isatty() and not os.environ.get("NO_COLOR")
 _CODES = {"bold": "1", "dim": "2", "red": "31", "green": "32", "yellow": "33", "blue": "34", "cyan": "36"}
 
 
+def keep_awake() -> None:
+    """macOS: stop the machine sleeping while this process runs (a sleeping Mac stalls live API calls)."""
+    import shutil
+    import subprocess
+    if sys.platform == "darwin" and shutil.which("caffeinate"):
+        subprocess.Popen(["caffeinate", "-dims", "-w", str(os.getpid())],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
 def c(text: str, *styles: str) -> str:
     if not _COLOR or not styles:
         return text
