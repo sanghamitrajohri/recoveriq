@@ -167,6 +167,25 @@ def jev_vs_without(with_jev: dict, without: list[dict]) -> list[tuple[str, str]]
     return out
 
 
+def why_jev(item: dict, jev_state: dict | None) -> list[tuple[str, str]]:
+    """Jev's answer laid next to the evidence it was given and the option descriptions we wrote.
+    This is not Jev's internal reasoning (that is not visible); it shows what went in and what came out."""
+    from jev_adapter import FAILURE_TYPES
+    from recovery_policy import ACTION_DESCRIPTIONS
+    out = [("warn", "   WHY THIS ANSWER (evidence in -> Jev's pick, shown with the description we gave Jev):")]
+    if jev_state:
+        damaged = jev_state.get("files_damaged_since_last_good_checkpoint") or []
+        out.append(("warn", f"     evidence : failure={jev_state.get('latest_failure_type')}, "
+                            f"attempt {jev_state.get('attempts_made')} of {jev_state.get('max_attempts')}"
+                            + (f", protected file changed: {', '.join(damaged)}" if damaged else ", no protected file changed")))
+    ftype = item.get("failure_type")
+    if ftype in FAILURE_TYPES:
+        out.append(("warn", f"     cause    : {ftype} = \"{FAILURE_TYPES[ftype]}\""))
+    if item["action"] in ACTION_DESCRIPTIONS:
+        out.append(("warn", f"     best move: {item['action']} = \"{ACTION_DESCRIPTIONS[item['action']]}\""))
+    return out
+
+
 def describe(item: dict, jev_state: dict | None = None) -> list[tuple[str, str]]:
     """One trace item as (style, text) lines. Style is '', 'good', 'bad', 'jev', 'warn' or 'dim'."""
     kind, out = item["kind"], []
@@ -207,6 +226,7 @@ def describe(item: dict, jev_state: dict | None = None) -> list[tuple[str, str]]
             out.append(("jev", f"   Q3 will a retry help?   {item['retry_would_help']:.2f}"))
         if item.get("impossible") is not None:
             out.append(("jev", f"   Q4 is it impossible?    {item['impossible']:.2f}"))
+        out += why_jev(item, jev_state)
     elif kind == "decision":
         who = SOURCE_PLAIN.get(item["proposal_source"], item["proposal_source"])
         if item["overridden"]:

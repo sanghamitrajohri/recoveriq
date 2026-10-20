@@ -25,6 +25,19 @@ from strategies import make_strategy  # noqa: E402
 
 LABELS = {"recoveriq": "RecoverIQ (Jev + gate)", "recoveriq_raw": "Jev only (no gate)",
           "rule_based": "Rule-based (hand-written rules)", "fixed_retry": "Fixed retry (always retry)"}
+INTRO_RECOVERIQ = [
+    "RecoverIQ is a cost-aware recovery controller for AI coding agents.",
+    "When a Claude agent fails a task, TypeSafe's Jev decides whether to retry, switch models,",
+    "restore a checkpoint, escalate to a human or stop. Fixed budget and safety rules can veto",
+    "that choice, so you get more verified fixes per dollar than with blind retries.",
+]
+INTRO_JEV = [
+    "Jev is TypeSafe's decision model, called through their \"System One\" API.",
+    "It doesn't write code or text. You give it a JSON description of a situation plus a few",
+    "structured questions, and it sends back answers with probabilities.",
+    "It costs $0.042 per million input tokens and output is free, so each decision costs a",
+    "fraction of a cent. In RecoverIQ it acts as the \"kitchen manager\" that picks the recovery move.",
+]
 SHORT = {"recoveriq": "RecoverIQ", "recoveriq_raw": "Jev only", "rule_based": "Rule-based", "fixed_retry": "Fixed retry"}
 
 
@@ -53,6 +66,13 @@ def main() -> None:
         live = "LIVE" in str(v).upper() or "live" in str(v)
         print(f"  {k:>7}: {c(str(v), 'green' if live else 'yellow')}")
     print(f"  budget : ${budget.max_cost_usd:.2f} and {budget.max_attempts} attempts per strategy")
+
+    rule("What is RecoverIQ?")
+    for line in INTRO_RECOVERIQ:
+        print("  " + line)
+    rule("What is Jev?")
+    for line in INTRO_JEV:
+        print("  " + c(line, "cyan"))
 
     rule(f"The task: {task.id}")
     print(f"  {task.title}")
