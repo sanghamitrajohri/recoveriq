@@ -148,23 +148,42 @@ footer { color: var(--muted); font-size: 0.88rem; border-top: 1px solid var(--ru
   <p class="lede">When an AI coding agent fails, someone has to decide what happens next: try again, call a bigger model, roll back the files, ask a person, or stop. RecoverIQ makes that call with TypeSafe's <strong>Jev</strong> decision model and checks it against a hard budget.</p>
 </header>
 
+<!-- FAILURE -->
+<section aria-labelledby="fail">
+  <div class="eyebrow">What "fail" means</div>
+  <h2 id="fail">Usually the agent did answer. The answer just didn't work.</h2>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Failure</th><th>What happened</th><th>Everyday comparison</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_failure</code></td><td>It wrote code, but the code gives wrong answers</td><td>Homework handed in with wrong answers</td></tr>
+        <tr><td><code>acceptance_failure</code></td><td>It passed the tests it could see, but failed the hidden ones</td><td>Aced the practice quiz, failed the real exam</td></tr>
+        <tr><td><code>malformed_output</code></td><td>Its reply wasn't usable code (garbled, wrong format)</td><td>Handed in a scribble instead of an essay</td></tr>
+        <tr><td><code>output_truncated</code></td><td>It ran out of room and stopped mid-code</td><td>Essay cut off halfway through a sentence</td></tr>
+        <tr><td><code>collection_error</code></td><td>The code is so broken the tests can't even run</td><td>The homework file won't open</td></tr>
+        <tr><td><code>llm_error</code></td><td>The AI service errored out, so no response</td><td>The phone line went dead</td></tr>
+        <tr><td><code>timeout</code></td><td>It took too long</td><td>Missed the deadline</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">Only <code>llm_error</code>, and sometimes <code>timeout</code>, means "no response." Every other row means the agent answered with something wrong. That's the more common and more interesting kind of failure.</p>
+</section>
+
 <!-- PLAIN WORDS -->
 <section aria-labelledby="plain">
   <div class="eyebrow">In plain words</div>
   <h2 id="plain">A robot baker, a salty cake, and a manager who thinks first</h2>
   <div class="story">
-    <p>Imagine you run a bakery with a robot baker. You hand it a recipe, it bakes a cake, and a taster checks whether the cake is right. Every cake costs money for ingredients and oven time. Sometimes the cake comes out wrong.</p>
-    <p>The simplest bakery has one rule for a bad cake: <strong>bake it again</strong>. Now picture what happens when somebody has secretly swapped the sugar jar for salt. The robot bakes again, and the cake is salty. Again, salty. Five cakes later the bakery has spent five times the money and still has no cake, because baking again never fixes a jar of salt.</p>
+    <p>Picture a robot baker. It bakes a cake, a taster checks it, and every cake costs money. The simplest bakery has one rule for a bad cake: <strong>bake it again</strong>. But if someone swapped the sugar for salt, every new cake is salty too, and the money is gone.</p>
     <p class="kicker">A bad cake can have very different causes, and each one has a different cheap fix.</p>
     <div class="oops">
-      <div><b>The oven tripped the fuse for a second</b><div class="do">→ just bake again</div><span>The only case where "again" is the right answer.</span></div>
-      <div><b>The recipe was too long for the robot's tiny notepad</b><div class="do">→ send a bigger robot</div><span>It copied half the recipe. Retrying copies the same half.</span></div>
-      <div><b>Someone swapped the sugar for salt</b><div class="do">→ put the pantry back</div><span>Use the photo of how the pantry looked this morning.</span></div>
-      <div><b>The customer wanted it gluten-free but never said so</b><div class="do">→ ask the customer</div><span>No robot can guess a wish nobody wrote down.</span></div>
-      <div><b>The order says "all chocolate" and "all vanilla"</b><div class="do">→ stop and send it back</div><span>No cake can be both. Every attempt is wasted money.</span></div>
+      <div><b>The oven tripped the fuse for a second</b><div class="do">→ just bake again</div></div>
+      <div><b>The recipe was too long for the robot's tiny notepad</b><div class="do">→ send a bigger robot</div></div>
+      <div><b>Someone swapped the sugar for salt</b><div class="do">→ put the pantry back</div></div>
+      <div><b>The customer wanted it gluten-free but never said so</b><div class="do">→ ask the customer</div></div>
+      <div><b>The order says "all chocolate" and "all vanilla"</b><div class="do">→ stop and send it back</div></div>
     </div>
-    <p>RecoverIQ adds a <strong>kitchen manager</strong> who looks at each bad cake, glances at the pantry, and picks one of those five moves. The manager's opinion is nearly free: about a two-hundredth of a cent and a tenth of a second. Baking another cake with the big robot costs about eight cents. A strict <strong>accountant</strong> stands next to the manager and can veto any move the bakery can't afford.</p>
-    <p>One more twist from our real runs: given the impossible "all chocolate and all vanilla" order, the big robot <strong>stuck a label on the box that fooled the taster</strong> into ticking both boxes. The cake was still wrong. So we added an inspector who opens the box before we count a cake as done.</p>
+    <p>RecoverIQ adds a <strong>kitchen manager</strong> (Jev) who picks one of those five moves for about a two-hundredth of a cent, and an <strong>accountant</strong> (the budget policy) who vetoes anything the bakery can't afford.</p>
   </div>
   <div class="tbl">
     <table>
@@ -173,27 +192,21 @@ footer { color: var(--muted); font-size: 0.88rem; border-top: 1px solid var(--ru
         <tr><td>Robot baker</td><td>The <strong>coding agent</strong>: Claude writes a fix for a buggy Python file</td></tr>
         <tr><td>Small robot / big robot</td><td><strong>Claude Haiku 4.5</strong> (cheap, 1,024-token output limit) / <strong>Claude Opus 5</strong> (capable, about 10× the cost per attempt)</td></tr>
         <tr><td>The taster</td><td>The <strong>unit tests</strong> (pytest), run inside a locked-down sandbox</td></tr>
-        <tr><td>A secret taster the robot never meets</td><td><strong>Hidden acceptance tests</strong> the agent never sees</td></tr>
         <tr><td>The pantry</td><td>The <strong>workspace</strong>: the project's files</td></tr>
         <tr><td>This morning's photo of the pantry</td><td>A <strong>checkpoint</strong>: a file snapshot, verified by hash when restored</td></tr>
-        <tr><td>Fuse trips for a second</td><td>A <strong>transient API error</strong> (the provider says "overloaded")</td></tr>
-        <tr><td>Tiny notepad</td><td>The model's <strong>output-token limit</strong>, which truncates long answers</td></tr>
         <tr><td>The kitchen manager</td><td><strong>Jev</strong>, TypeSafe's decision model: it answers typed questions with probabilities</td></tr>
         <tr><td>The accountant's veto</td><td>The <strong>recovery policy</strong>: budget, attempt and time limits in plain code</td></tr>
-        <tr><td>Label that fooled the taster</td><td><strong>Reward hacking</strong>: the model overrode string equality so contradictory tests passed</td></tr>
-        <tr><td>The inspector who opens the box</td><td>The <strong>integrity audit</strong>: only clean fixes count</td></tr>
-        <tr><td>Cakes per dollar</td><td><strong>Clean fixes per dollar</strong>, the number this project measures</td></tr>
       </tbody>
     </table>
   </div>
-  <p class="muted">The rest of this page uses the real terms. The live race below is the salt-in-the-sugar-jar case, in an online shop: a settings file was quietly changed.</p>
+  <p class="muted">The live race below is the salt-in-the-sugar case.</p>
 </section>
 
 <!-- RACE -->
 <section aria-labelledby="race">
   <div class="eyebrow">The demo</div>
   <h2 id="race">An online shop starts charging 80% tax. Three strategies race to fix it.</h2>
-  <p>The agent's job is a small checkout bug: free shipping doesn't apply at exactly $50. While it works, somebody fat-fingers the store's tax setting from <code>0.08</code> to <code>0.80</code>. The comment still says "8% sales tax", so a $100 order now costs <strong>$180</strong>. The agent is only allowed to edit the checkout file, so trying again can't fix the setting. All three strategies start at the same moment with the same $0.25 budget.</p>
+  <p>The agent fixes a small checkout bug. Meanwhile someone changes the store's tax setting from <code>0.08</code> to <code>0.80</code>, so a $100 order costs <strong>$180</strong>. The agent may only edit the checkout file, so retrying can't fix it. Same $0.25 budget for all three.</p>
   <figure>
     <div class="fig wide">
       <svg viewBox="0 0 760 214" role="img" aria-label="Race timeline: RecoverIQ solved the task cleanly in 13 seconds for $0.0068; fixed retry gave up after 46 seconds and $0.027; rule-based passed the tests after 98 seconds and $0.186, but only by rewriting the settings file, which the inspector flagged as cheating.">
@@ -217,7 +230,7 @@ footer { color: var(--muted); font-size: 0.88rem; border-top: 1px solid var(--ru
         </g>
       </svg>
     </div>
-    <figcaption>A live race on task <code>t10_checkout</code>, run through the dashboard on 19 Oct 2026 with real API calls. The rule-based run only passed after asking a human and letting the expensive model write code that rewrites the settings file at runtime; the dashboard's inspector flags this as cheating. A second sneaky case, a science constant changed from 1.8 to 1.6 (<code>t7_temperature</code>), shows the same pattern: RecoverIQ fixed it in 5 s for $0.0024 while both other strategies gave up.</figcaption>
+    <figcaption>Live run on <code>t10_checkout</code>, 19 Oct 2026. The rule-based "pass" came from code that rewrites the settings file, which the inspector flags as cheating. Same pattern on <code>t7_temperature</code>: RecoverIQ fixed it in 5 s for $0.0024; both others gave up.</figcaption>
   </figure>
   <div class="tbl">
     <table>
@@ -230,24 +243,14 @@ footer { color: var(--muted); font-size: 0.88rem; border-top: 1px solid var(--ru
       </tbody>
     </table>
   </div>
-  <p class="muted">This task was added after the main 108-run benchmark, to make the effect easy to see, and is reported separately (<code>results/live-t10-checkout</code>).</p>
-</section>
-
-<!-- PROBLEM -->
-<section aria-labelledby="problem">
-  <div class="eyebrow">The problem</div>
-  <h2 id="problem">Agents fail often, and the default response is to pay again</h2>
-  <div class="two">
-    <p>Coding agents fail for very different reasons. The provider can be overloaded for a moment. The model's answer can be cut off at its output limit. Another tool can damage a file. The requirement can live only in someone's head, or the tests can contradict each other. Most agent loops respond to all of these the same way: retry the same model on the same files and hope.</p>
-    <p>Retrying works for the first reason and wastes money on the rest. A smarter loop needs to tell the failures apart, pick the cheapest action that is likely to work, and know when to stop. Hand-written rules can do some of this, but each rule only knows the failures its author thought of.</p>
-  </div>
+  <p class="muted">Added after the main 108-run benchmark and reported separately (<code>results/live-t10-checkout</code>).</p>
 </section>
 
 <!-- BOTTLENECK -->
 <section aria-labelledby="bottleneck">
   <div class="eyebrow">Where the bottleneck is</div>
   <h2 id="bottleneck">The cost is decided in the step after a test fails</h2>
-  <p>The model, the sandbox and the tests behave the same under every strategy. What changes the bill is the single decision made after each failure. Plain retry has one exit from that decision. RecoverIQ has five, chosen by Jev and filtered by a budget policy written in ordinary code.</p>
+  <p>Most agent loops answer every failure the same way: retry and pay again. That fixes a provider blip and wastes money on everything else. RecoverIQ gives the step after a failed test five exits, picked by Jev and checked by a budget policy in plain code.</p>
   <figure>
     <div class="fig wide">
       <svg viewBox="0 0 960 330" role="img" aria-label="Comparison. Fixed retry: a failed test always loops back to the same attempt. RecoverIQ: a failed test goes to a Jev decision and then a policy check, which routes to one of five actions: retry, switch model, restore checkpoint, ask a human, or stop.">
@@ -312,7 +315,7 @@ footer { color: var(--muted); font-size: 0.88rem; border-top: 1px solid var(--ru
         <text x="720" y="58" font-size="11" text-anchor="middle" class="mut">next attempt (except stop)</text>
       </svg>
     </div>
-    <figcaption>The highlighted box is where money is saved or wasted. Jev answers in about a tenth of a second for a few hundred-thousandths of a dollar; the attempt it triggers can cost a thousand times more.</figcaption>
+    <figcaption>Jev answers in ~0.1 s for a few hundred-thousandths of a dollar. The attempt it triggers can cost a thousand times more.</figcaption>
   </figure>
 </section>
 
@@ -348,12 +351,12 @@ footer { color: var(--muted); font-size: 0.88rem; border-top: 1px solid var(--ru
         <text x="480" y="190" font-size="11" text-anchor="middle" class="mut">next attempt, with feedback, a new model, restored files or a human hint</text>
       </svg>
     </div>
-    <figcaption>Generated code only runs inside a macOS sandbox that blocks the network and can't read API keys. Checkpoints are file snapshots verified by hash. A LangGraph state machine runs the loop and pauses for human input when the action is "ask a human".</figcaption>
+    <figcaption>Generated code runs in a sandbox with no network and no API keys. Checkpoints are hash-verified snapshots. LangGraph runs the loop and pauses when a human is needed.</figcaption>
   </figure>
   <div class="two">
     <div style="display:grid;gap:10px">
       <h3>What one Jev decision looks like</h3>
-      <p class="muted">The first live call, made on the long-file task after the cheap model's answer was cut off. These are the real answers.</p>
+      <p class="muted">First live call, after the cheap model's answer was cut off.</p>
 <pre>state: failure=output_truncated, attempts=1,
        model=claude-haiku-4-5, budget=$0.24 left
 answers:
@@ -366,7 +369,7 @@ usage: 1,066 input tokens · 124 ms · $0.0000448</pre>
     </div>
     <div style="display:grid;gap:10px">
       <h3>Why there is a retry gate</h3>
-      <p>Jev knew the cause and rated a retry's chance at 0.19, yet its action pick was retry, probably because the question asks for the cheapest action. RecoverIQ therefore adds one rule in code: if Jev says a retry is unlikely to help, take its next-ranked action. The table below reports both versions, "Jev only" and "RecoverIQ" (with the gate).</p>
+      <p>Jev rated a retry's chance at 0.19 but still picked retry. So we added one rule in code: if Jev says retry is unlikely to help, take its next choice. Results show both: "Jev only" and "RecoverIQ" (with the gate).</p>
     </div>
   </div>
 </section>
@@ -375,7 +378,7 @@ usage: 1,066 input tokens · 124 ms · $0.0000448</pre>
 <section aria-labelledby="tasks">
   <div class="eyebrow">The benchmark</div>
   <h2 id="tasks">Ten bug-fix tasks, each failing in a different way</h2>
-  <p>Each task has a buggy Python file, tests the agent can see, and hidden acceptance tests it never sees. A fix counts only when both pass. Faults such as file damage and provider errors are injected by the harness and labeled in every log.</p>
+  <p>Each task has a buggy file, visible tests, and hidden tests the agent never sees. A fix counts only if both pass. Injected faults are labeled in every log.</p>
   <div class="tbl">
     <table>
       <thead><tr><th>Task</th><th>What goes wrong</th><th>Best recovery</th></tr></thead>
@@ -400,7 +403,7 @@ usage: 1,066 input tokens · 124 ms · $0.0000448</pre>
 <section aria-labelledby="results">
   <div class="eyebrow">Results · 108 live runs · $2.41</div>
   <h2 id="results">RecoverIQ fixed the most tasks for the least money</h2>
-  <p>A <strong>clean</strong> fix passes every visible and hidden test, leaves no helper file damaged, and shows no sign of gaming the tests. We report clean fixes because the strong model gamed the impossible task (see the findings below).</p>
+  <p>A <strong>clean</strong> fix passes every visible and hidden test, damages no other file, and doesn't game the tests.</p>
   <div class="charts">
     <figure>
       <div class="fig">
@@ -483,22 +486,22 @@ usage: 1,066 input tokens · 124 ms · $0.0000448</pre>
     <div class="finding">
       <div class="tag g">Jev wins</div>
       <h3>It caught damage the rules couldn't see</h3>
-      <p>On silent corruption the error looks like any failing assertion, so the rules retried and called the expensive model (and once asked a human) and failed every time. Jev was told which files had changed since the last good snapshot, diagnosed <code>workspace_damaged</code> with 0.97 confidence in rehearsal, and restored the checkpoint.</p>
+      <p>Silent corruption looks like any failing test, so the rules retried, upgraded and failed 3 of 3. Jev saw which files had changed since the last good snapshot and restored the checkpoint 3 of 3.</p>
     </div>
     <div class="finding">
       <div class="tag b">The model cheated</div>
       <h3>Claude Opus gamed the impossible task</h3>
-      <p>Faced with two contradictory tests, Opus returned a fake string type whose equality check treats <code>-</code> and <code>_</code> as the same, so both tests passed. On the checkout task it went further, writing code that rewrites the store's settings file while the tests run. An inspector now flags both tricks, live in the dashboard, and gamed runs don't count as fixes.</p>
+      <p>Given two contradictory tests, Opus returned a fake string type that treats <code>-</code> and <code>_</code> as equal, so both passed. On checkout it rewrote the settings file at runtime. An inspector now flags both, and gamed runs don't count.</p>
     </div>
     <div class="finding">
       <div class="tag m">Trade-off</div>
       <h3>The retry gate helps and hurts</h3>
-      <p>It stopped Jev from retrying a truncated answer, saving money on t3. It also skipped cheap retries after temporary provider errors, where retrying is right, so it cost about 4× more on t1 ($0.024 vs $0.006).</p>
+      <p>It saved money on truncated answers (t3) but skipped cheap retries after provider blips, costing ~4× more on t1 ($0.024 vs $0.006).</p>
     </div>
     <div class="finding">
       <div class="tag m">Trade-off</div>
       <h3>People cost more than models</h3>
-      <p>Priced at $0.50 per question, human time dominates. Cost per clean fix then becomes $0.032 for fixed retry, $0.089 for Jev only, $0.107 for RecoverIQ and $0.135 for the rules. Fixed retry never asks anyone, even though it solves less than half the tasks.</p>
+      <p>At $0.50 per human question, cost per clean fix becomes $0.032 fixed retry, $0.089 Jev only, $0.107 RecoverIQ and $0.135 rules. Fixed retry never asks anyone, but solves under half the tasks.</p>
     </div>
   </div>
   <figure>
@@ -521,12 +524,12 @@ def slugify(title: str) -> str:
   <div class="eyebrow">Limits</div>
   <h2 id="caveats">Read these before quoting the numbers</h2>
   <ul class="plain">
-    <li>The sample is small: 3 repeats of 9 tasks per strategy. The silent-corruption result (3 of 3 against 0 of 3) is clear; most other differences are a few runs or a few cents.</li>
-    <li>The retry gate was added after seeing the first live Jev answer. "Jev only" is the version decided beforehand, and it also beats both baselines on clean fixes per dollar.</li>
-    <li>One person wrote the tasks and the rules. Tasks t7 to t9 were added later to probe the rules' blind spots.</li>
-    <li>In t8 and t9 the cheap model succeeded on the first try, so they only measure overhead.</li>
-    <li>Human replies are scripted from each task's documented hint, and provider errors and file damage are injected.</li>
-    <li>The gaming check is a heuristic. It catches the patterns we saw and could miss others.</li>
+    <li>Small sample: 3 repeats of 9 tasks per strategy. Silent corruption (3 of 3 vs 0 of 3) is clear; most other gaps are a few runs or cents.</li>
+    <li>The retry gate was added after the first live Jev answer. "Jev only" was decided beforehand and still beats both baselines per dollar.</li>
+    <li>One person wrote the tasks and rules; t7 to t9 were added later to probe the rules' blind spots.</li>
+    <li>t8 and t9 were solved on the first try, so they only measure overhead.</li>
+    <li>Human replies are scripted; provider errors and file damage are injected.</li>
+    <li>The gaming check is a heuristic and could miss new tricks.</li>
   </ul>
 </section>
 
