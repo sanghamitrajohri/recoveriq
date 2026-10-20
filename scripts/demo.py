@@ -16,15 +16,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from agent import Task  # noqa: E402
 from benchmark import provenance  # noqa: E402
-from config import RUNS_DIR, Budget, Settings  # noqa: E402
+from config import RESULTS_DIR, RUNS_DIR, Budget, Settings  # noqa: E402
 from engine import RecoveryRun, console_human, scripted_human  # noqa: E402
 from integrity import audit  # noqa: E402
 from narrate import (ACTION_PLAIN, agent_change, c, code_listing, hidden_test_count, printer,  # noqa: E402
-                     sabotage_diff, visible_tests)  # noqa: E402
+                     jev_vs_without, sabotage_diff, saved_results, styled, visible_tests)  # noqa: E402
 from strategies import make_strategy  # noqa: E402
 
 LABELS = {"recoveriq": "RecoverIQ (Jev + gate)", "recoveriq_raw": "Jev only (no gate)",
           "rule_based": "Rule-based (hand-written rules)", "fixed_retry": "Fixed retry (always retry)"}
+SHORT = {"recoveriq": "RecoverIQ", "recoveriq_raw": "Jev only", "rule_based": "Rule-based", "fixed_retry": "Fixed retry"}
 
 
 def rule(title: str) -> None:
@@ -75,7 +76,7 @@ def main() -> None:
         print(f"  What goes wrong: {task.scenario_note}")
     print("  After each failure there are five moves: " + " | ".join(ACTION_PLAIN.values()))
 
-    rows = []
+    rows, outcome = [], {}
     for name in args.strategies.split(","):
         rule(f"Strategy: {LABELS.get(name, name)}")
         run = RecoveryRun(task, make_strategy(name, settings.jev_mode, settings.jev_model), settings, budget,
@@ -112,6 +113,10 @@ def main() -> None:
                     "dim"))
         rows.append((name, ok and check["clean"], verdict, state.get("attempt", 0), spent, secs,
                      state.get("actions", [])))
+        outcome[name] = {"label": SHORT.get(name, name), "clean": bool(ok and check["clean"]), "cost": spent,
+                         "secs": secs, "fixed": "yes" if ok and check["clean"] else ("CHEATED" if ok else "no fix"),
+                         "note": "live, just now", "jev_cost": run.rc.tracker.spent_by_kind("jev_decision"),
+                         "jev_calls": sum(e.kind == "jev_decision" for e in run.rc.tracker.events)}
 
     rule("Scoreboard")
     print(f"  {'strategy':<34}{'clean fix':<11}{'attempts':>9}{'cost':>10}{'time':>7}  moves")
@@ -123,6 +128,32 @@ def main() -> None:
     if winners:
         best = min(winners, key=lambda r: r[4])
         print("\n  " + c(f"Cheapest clean fix: {LABELS.get(best[0], best[0])} at ${best[4]:.4f}", "green", "bold"))
+
+    print_jev_comparison(task, outcome)
+
+
+def print_jev_comparison(task, outcome: dict) -> None:
+    """With Jev (RecoverIQ) vs without Jev (fixed retry, rules): cost and time, live where we have it."""
+    saved = saved_results(task.id, RESULTS_DIR)
+
+    def from_saved(name: str) -> dict | None:
+        s = saved.get(name)
+        if not s:
+            return None
+        return {"label": SHORT.get(name, name), "clean": s["clean"] == s["runs"], "cost": s["cost"],
+                "secs": s["secs"], "fixed": f"{s['clean']}/{s['runs']} clean",
+                "note": f"avg of {s['runs']} saved live runs ({s['source']})"}
+
+    with_jev = outcome.get("recoveriq") or from_saved("recoveriq")
+    without = [outcome.get(n) or from_saved(n) for n in ("fixed_retry", "rule_based")]
+    without = [w for w in without if w]
+    if not with_jev or not without:
+        return
+    rule("With Jev vs without Jev")
+    for style, text in jev_vs_without(with_jev, without):
+        print("  " + styled(style, text))
+    if any("saved" in w.get("note", "") for w in without):
+        print(styled("dim", "  Saved runs are real live runs from the benchmark; rerun without --strategies to race them now."))
 
 
 if __name__ == "__main__":

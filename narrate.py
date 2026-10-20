@@ -93,6 +93,71 @@ def agent_change(task, workspace) -> str:
                                           f"{task.target_file} (after the AI's fix)", lineterm="", n=1))
 
 
+def saved_results(task_id: str, results_dir) -> dict[str, dict]:
+    """Per-strategy averages for one task from saved LIVE benchmark runs (results/*/runs.csv + integrity.csv)."""
+    import csv
+    import json
+    from pathlib import Path
+    out: dict[str, dict] = {}
+    for runs_csv in sorted(Path(results_dir).glob("*/runs.csv")):
+        d = runs_csv.parent
+        try:
+            m = json.loads((d / "manifest.json").read_text())
+        except (OSError, ValueError):
+            continue
+        if m.get("llm_mode") != "live" or m.get("jev_mode") != "live":
+            continue
+        clean = {}
+        if (d / "integrity.csv").exists():
+            clean = {r["run_id"]: r["clean_success"] == "1" for r in csv.DictReader(open(d / "integrity.csv"))}
+        for r in csv.DictReader(open(runs_csv)):
+            if r["task_id"] != task_id:
+                continue
+            s = out.setdefault(r["strategy"], {"runs": 0, "clean": 0, "cost": 0.0, "secs": 0.0, "source": d.name})
+            s["runs"] += 1
+            s["clean"] += int(clean.get(r["run_id"], r["verified_success"] == "1"))
+            s["cost"] += float(r["total_cost_usd"])
+            s["secs"] += float(r["latency_s"])
+    for s in out.values():
+        s["cost"] /= s["runs"]
+        s["secs"] /= s["runs"]
+    return out
+
+
+NO_FIX = "RecoverIQ did not get a clean fix this time, so there is no Jev win to claim on this run."
+
+
+def jev_verdict(with_jev: dict, w: dict) -> tuple[bool, str] | None:
+    """(jev_better, sentence) comparing one no-Jev run to the Jev run, or None if not comparable."""
+    if not (with_jev["cost"] and with_jev["secs"]) or not with_jev["clean"]:
+        return None
+    cost_x, time_x = w["cost"] / with_jev["cost"], w["secs"] / with_jev["secs"]
+    money = f"spent {cost_x:.1f}x more" if cost_x >= 1 else f"spent {1 / cost_x:.1f}x LESS"
+    speed = f"took {time_x:.1f}x longer" if time_x >= 1 else f"was {1 / time_x:.1f}x FASTER"
+    result = "and got no clean fix" if not w["clean"] else "for the same result"
+    return cost_x >= 1, f"without Jev, {w['label']} {money}, {speed}, {result}"
+
+
+def jev_vs_without(with_jev: dict, without: list[dict]) -> list[tuple[str, str]]:
+    """Rows are dicts with label, fixed (text), clean (bool), cost, secs, note. Returns styled lines."""
+    def row(prefix: str, r: dict) -> str:
+        return f"{prefix + r['label']:<26}{r['fixed']:<12}{'$' + format(r['cost'], '.4f'):>9}{r['secs']:>6.0f}s  {r.get('note', '')}"
+    out = [("bold", f"{'':<26}{'clean fix?':<12}{'cost':>9}{'time':>7}")]
+    out.append(("good", row("WITH Jev:    ", with_jev)))
+    for w in without:
+        out.append(("bad" if not w["clean"] else "", row("without Jev: ", w)))
+        v = jev_verdict(with_jev, w)
+        if v:
+            out.append(("good" if v[0] else "warn", f"{'':<26}-> {v[1]}"))
+    if not with_jev["clean"]:
+        out.append(("warn", NO_FIX))
+    if with_jev.get("jev_cost") is not None:
+        share = with_jev["jev_cost"] / with_jev["cost"] * 100 if with_jev["cost"] else 0
+        out.append(("jev", f"Jev's own cost: ${with_jev['jev_cost']:.5f} for {with_jev['jev_calls']} decision(s), "
+                           f"{share:.1f}% of RecoverIQ's spend. The rest is Claude writing code."))
+    return out
+
+
 def describe(item: dict, jev_state: dict | None = None) -> list[tuple[str, str]]:
     """One trace item as (style, text) lines. Style is '', 'good', 'bad', 'jev', 'warn' or 'dim'."""
     kind, out = item["kind"], []
@@ -148,7 +213,12 @@ def describe(item: dict, jev_state: dict | None = None) -> list[tuple[str, str]]
     return out
 
 
-_STYLE = {"good": ("green", "bold"), "bad": ("red",), "jev": ("cyan",), "warn": ("yellow",), "dim": ("dim",), "": ()}
+_STYLE = {"good": ("green", "bold"), "bad": ("red",), "jev": ("cyan",), "warn": ("yellow",), "dim": ("dim",),
+          "bold": ("bold",), "": ()}
+
+
+def styled(style: str, text: str) -> str:
+    return c(text, *_STYLE[style])
 
 
 def printer(prefix: str = ""):

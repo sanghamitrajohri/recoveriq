@@ -15,7 +15,8 @@ from benchmark import aggregate
 from config import RESULTS_DIR, RUNS_DIR, Budget, Settings
 from engine import RecoveryRun, scripted_human
 from integrity import audit
-from narrate import ACTION_PLAIN, SOURCE_PLAIN, STATUS_PLAIN, bug_lines, c, printer, sabotage_diff
+from narrate import (ACTION_PLAIN, SOURCE_PLAIN, STATUS_PLAIN, NO_FIX, bug_lines, c, jev_verdict, printer,
+                     sabotage_diff, saved_results)
 from strategies import STRATEGY_NAMES, make_strategy
 
 st.set_page_config(page_title="RecoverIQ", page_icon="🛟", layout="wide")
@@ -162,6 +163,48 @@ def explain_steps(run: RecoveryRun) -> list[str]:
     return lines
 
 
+SHORT = {"recoveriq": "RecoverIQ", "recoveriq_raw": "Jev only", "rule_based": "Rule-based", "fixed_retry": "Fixed retry"}
+
+
+def live_row(name: str, run: RecoveryRun, secs: float) -> dict:
+    ok = run.state.get("status") == "success"
+    clean = ok and audit(run.rc.task, run.rc.workspace)["clean"]
+    return {"label": SHORT[name], "clean": clean, "cost": run.rc.tracker.spent_usd, "secs": secs,
+            "fixed": "✅ yes" if clean else ("⚠️ cheated" if ok else "❌ no fix"), "note": "live, just now",
+            "jev_cost": run.rc.tracker.spent_by_kind("jev_decision"),
+            "jev_calls": sum(e.kind == "jev_decision" for e in run.rc.tracker.events)}
+
+
+def jev_panel(task, live: dict[str, dict]) -> None:
+    """With Jev (RecoverIQ) vs without Jev (fixed retry, rules): cost and time. Missing rows come from saved live runs."""
+    saved = saved_results(task.id, RESULTS_DIR)
+
+    def row(name: str) -> dict | None:
+        if name in live:
+            return live[name]
+        s = saved.get(name)
+        return s and {"label": SHORT[name], "clean": s["clean"] == s["runs"], "cost": s["cost"], "secs": s["secs"],
+                      "fixed": f"{s['clean']}/{s['runs']} clean", "note": f"avg of {s['runs']} saved live runs ({s['source']})"}
+
+    with_jev, without = row("recoveriq"), [r for r in (row("fixed_retry"), row("rule_based")) if r]
+    if not with_jev or not without:
+        return
+    st.markdown("#### ⚖️ With Jev vs without Jev: cost and speed")
+    st.dataframe(pd.DataFrame([{"Strategy": r["label"], "Uses Jev?": "yes" if r is with_jev else "no",
+                                "Clean fix?": r["fixed"], "Cost (USD)": f"${r['cost']:.4f}",
+                                "Time": f"{r['secs']:.0f} s", "Source": r["note"]} for r in [with_jev, *without]]),
+                 hide_index=True, width="stretch")
+    if not with_jev["clean"]:
+        st.warning(NO_FIX)
+    for w in without:
+        v = jev_verdict(with_jev, w)
+        if v:
+            (st.success if v[0] else st.warning)(v[1][0].upper() + v[1][1:] + ".")
+    if with_jev.get("jev_cost") is not None and with_jev["cost"]:
+        st.caption(f"Jev's own cost: ${with_jev['jev_cost']:.5f} for {with_jev['jev_calls']} decision(s), "
+                   f"{with_jev['jev_cost'] / with_jev['cost'] * 100:.1f}% of RecoverIQ's spend. The rest is Claude writing code.")
+
+
 with tab_run:
     st.subheader(f"{task.title}")
     st.caption(f"**Scenario — {task.scenario}:** {task.scenario_note}")
@@ -217,6 +260,8 @@ with tab_run:
             m1.metric("Spent", f"${t.spent_usd:.5f}")
             m2.metric("Remaining", f"${t.remaining_usd:.5f}")
             m3.metric("Attempts", s.get("attempt", 0))
+            if run.rc.strategy.name == "recoveriq" and not payload and status != "running":
+                jev_panel(run.rc.task, {"recoveriq": live_row("recoveriq", run, (run.ended_at or time.perf_counter()) - run.rc.started_at)})
             st.caption("Costs are " + ("**measured** from API usage." if t.all_measured() else
                                        "**simulated/estimated** — not real API measurements."))
             chart = burn_chart(run)
@@ -444,6 +489,7 @@ with tab_race:
             best = min(winners, key=lambda n: runs[n].rc.tracker.spent_usd)
             st.success(f"Cheapest clean fix: **{LABELS[best]}** at ${runs[best].rc.tracker.spent_usd:.4f}"
                        + ("" if runs[best].rc.tracker.all_measured() else "  (simulated costs)"))
+        jev_panel(task, {n: live_row(n, runs[n], finished[n]) for n in RACERS if not errors.get(n)})
         st.markdown("#### 🔍 Step by step: why each strategy did what it did")
         for tab, n in zip(st.tabs([LABELS[n] for n in reversed(RACERS)]), reversed(RACERS)):
             with tab:
