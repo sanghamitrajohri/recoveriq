@@ -1,5 +1,7 @@
 # RecoverIQ — 3-minute live demo (AI Tinkerers)
 
+> **The click-by-click version with all the words is `docs/MY_DEMO_STEPS.md`.** It leads with the checkout race (`t10_checkout`), then a 5-second temperature run (`t7_temperature`). This file is the earlier outline built around the temperature race and the saved cheating example; use it as a backup.
+
 Every number here comes from the live benchmark `results/live-2026-10-19`: 108 runs with real
 Claude and real Jev calls, $2.41 total. Setup and fallbacks: `docs/DEMO_CHEATSHEET.md`.
 

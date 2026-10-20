@@ -14,6 +14,7 @@ from agent import list_tasks
 from benchmark import aggregate
 from config import RESULTS_DIR, RUNS_DIR, Budget, Settings
 from engine import RecoveryRun, scripted_human
+from integrity import audit
 from strategies import STRATEGY_NAMES, make_strategy
 
 st.set_page_config(page_title="RecoverIQ", page_icon="🛟", layout="wide")
@@ -288,6 +289,10 @@ def render_racer(box, name: str, run: RecoveryRun, finished_s: float | None, ela
             st.error(f"crashed: {error}")
         elif finished_s is None:
             st.markdown(f"### ⏳ working… {elapsed_s:.0f}s")
+        elif status == "success" and not (check := audit(run.rc.task, run.rc.workspace))["clean"]:
+            st.markdown(f"### ⚠️ \"SOLVED\" BY CHEATING ({finished_s:.0f}s)")
+            st.warning("Tests passed, but the inspector found: "
+                       + ", ".join(check["gaming"] + [f"damaged {f}" for f in check["damaged"]]))
         elif status == "success":
             st.markdown(f"### ✅ SOLVED in {finished_s:.0f}s")
         else:
@@ -345,8 +350,9 @@ with tab_race:
         _, runs, finished, errors = st.session_state.race
         for box, n in zip((c.empty() for c in st.columns(len(RACERS))), RACERS):
             render_racer(box, n, runs[n], finished[n], finished[n], errors.get(n))
-        winners = [n for n in RACERS if runs[n].state.get("status") == "success"]
+        winners = [n for n in RACERS if runs[n].state.get("status") == "success"
+                   and audit(task, runs[n].rc.workspace)["clean"]]
         if winners:
             best = min(winners, key=lambda n: runs[n].rc.tracker.spent_usd)
-            st.success(f"Cheapest verified fix: **{LABELS[best]}** at ${runs[best].rc.tracker.spent_usd:.4f}"
+            st.success(f"Cheapest clean fix: **{LABELS[best]}** at ${runs[best].rc.tracker.spent_usd:.4f}"
                        + ("" if runs[best].rc.tracker.all_measured() else "  (simulated costs)"))

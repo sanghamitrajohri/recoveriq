@@ -14,7 +14,7 @@ cd ~/Desktop/recoveriq
 - [ ] Browser opens at http://localhost:8501. Zoom to 125% (Cmd +) so the back row can read it.
 - [ ] Sidebar badges are **green**: "LLM: LIVE Anthropic" and "Jev: LIVE TypeSafe".
 - [ ] Warm-up: pick **t6_wordcount**, press **Run agent** on the Live run tab (seconds, about $0.001).
-- [ ] Then set the sidebar to **t7_temperature** and open the **🏁 Live race** tab. That's your starting screen.
+- [ ] Then set the sidebar to **t10_checkout** and open the **🏁 Live race** tab. That's your starting screen (see `docs/MY_DEMO_STEPS.md`).
 - [ ] Open the **Benchmark results** tab once and check that `live-2026-10-19` is selected.
 
 ## If something breaks on stage

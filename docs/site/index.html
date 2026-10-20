@@ -182,39 +182,51 @@ footer { color: var(--muted); font-size: 0.88rem; border-top: 1px solid var(--ru
       </tbody>
     </table>
   </div>
-  <p class="muted">The rest of this page uses the real terms. The live race below is the salt-in-the-sugar-jar case: a helper file was quietly changed.</p>
+  <p class="muted">The rest of this page uses the real terms. The live race below is the salt-in-the-sugar-jar case, in an online shop: a settings file was quietly changed.</p>
 </section>
 
 <!-- RACE -->
 <section aria-labelledby="race">
   <div class="eyebrow">The demo</div>
-  <h2 id="race">One broken task, three strategies, racing live</h2>
-  <p>A helper file in the agent's workspace was quietly changed while it worked: one constant now holds a wrong value. The file is still valid Python, so the tests fail exactly like an ordinary bug. All three strategies start at the same moment with the same $0.25 budget.</p>
+  <h2 id="race">An online shop starts charging 80% tax. Three strategies race to fix it.</h2>
+  <p>The agent's job is a small checkout bug: free shipping doesn't apply at exactly $50. While it works, somebody fat-fingers the store's tax setting from <code>0.08</code> to <code>0.80</code>. The comment still says "8% sales tax", so a $100 order now costs <strong>$180</strong>. The agent is only allowed to edit the checkout file, so trying again can't fix the setting. All three strategies start at the same moment with the same $0.25 budget.</p>
   <figure>
     <div class="fig wide">
-      <svg viewBox="0 0 760 214" role="img" aria-label="Race timeline: RecoverIQ solved the task in 5 seconds for $0.0024; fixed retry gave up after 37 seconds and $0.021; rule-based gave up after 72 seconds and $0.126.">
+      <svg viewBox="0 0 760 214" role="img" aria-label="Race timeline: RecoverIQ solved the task cleanly in 13 seconds for $0.0068; fixed retry gave up after 46 seconds and $0.027; rule-based passed the tests after 98 seconds and $0.186, but only by rewriting the settings file, which the inspector flagged as cheating.">
         <line class="grid" x1="150" y1="22" x2="150" y2="178"/><line class="grid" x1="266" y1="22" x2="266" y2="178"/>
         <line class="grid" x1="382" y1="22" x2="382" y2="178"/><line class="grid" x1="498" y1="22" x2="498" y2="178"/>
         <line class="grid" x1="614" y1="22" x2="614" y2="178"/><line class="grid" x1="730" y1="22" x2="730" y2="178"/>
         <g class="mono mut" font-size="11" text-anchor="middle">
-          <text x="150" y="198">0 s</text><text x="266" y="198">15 s</text><text x="382" y="198">30 s</text>
-          <text x="498" y="198">45 s</text><text x="614" y="198">60 s</text><text x="730" y="198">75 s</text>
+          <text x="150" y="198">0 s</text><text x="266" y="198">20 s</text><text x="382" y="198">40 s</text>
+          <text x="498" y="198">60 s</text><text x="614" y="198">80 s</text><text x="730" y="198">100 s</text>
         </g>
         <g font-size="13" font-weight="600" text-anchor="end">
           <text x="138" y="62">RecoverIQ</text><text x="138" y="114">Fixed retry</text><text x="138" y="166">Rule-based</text>
         </g>
-        <rect class="bar f-riq" x="150" y="50" width="38.7" height="16" rx="4"><title>RecoverIQ: solved in 5 s, $0.0024</title></rect>
-        <rect class="bar f-fixed" x="150" y="102" width="286" height="16" rx="4"><title>Fixed retry: gave up after 37 s, $0.021</title></rect>
-        <rect class="bar f-rule" x="150" y="154" width="556.8" height="16" rx="4"><title>Rule-based: gave up after 72 s, $0.126</title></rect>
+        <rect class="bar f-riq" x="150" y="50" width="75.4" height="16" rx="4"><title>RecoverIQ: solved cleanly in 13 s, $0.0068</title></rect>
+        <rect class="bar f-fixed" x="150" y="102" width="266.8" height="16" rx="4"><title>Fixed retry: gave up after 46 s, $0.027</title></rect>
+        <rect class="bar f-rule" x="150" y="154" width="568.4" height="16" rx="4"><title>Rule-based: tests passed after 98 s and $0.186, by rewriting the settings file</title></rect>
         <g font-size="12">
-          <text x="150" y="42" class="t-good" font-weight="600">Solved in 5 s · $0.0024 · Jev chose restore checkpoint</text>
-          <text x="150" y="94" class="t-bad" font-weight="600">Gave up after 5 attempts · 37 s · $0.021</text>
-          <text x="150" y="146" class="t-bad" font-weight="600">Gave up after retry, then the expensive model · 72 s · $0.126</text>
+          <text x="150" y="42" class="t-good" font-weight="600">Solved in 13 s · $0.0068 · Jev chose restore checkpoint (0.97)</text>
+          <text x="150" y="94" class="t-bad" font-weight="600">Gave up after 5 attempts · 46 s · $0.027</text>
+          <text x="150" y="146" class="t-bad" font-weight="600">"Solved" by cheating · 98 s · $0.186 (27× more) · rewrote the settings file</text>
         </g>
       </svg>
     </div>
-    <figcaption>A live race on task <code>t7_temperature</code>, recorded during rehearsal on 19 Oct 2026 with real API calls. RecoverIQ was done after 5 seconds; the other two kept going for another 32 and 67 seconds before giving up.</figcaption>
+    <figcaption>A live race on task <code>t10_checkout</code>, run through the dashboard on 19 Oct 2026 with real API calls. The rule-based run only passed after asking a human and letting the expensive model write code that rewrites the settings file at runtime; the dashboard's inspector flags this as cheating. A second sneaky case, a science constant changed from 1.8 to 1.6 (<code>t7_temperature</code>), shows the same pattern: RecoverIQ fixed it in 5 s for $0.0024 while both other strategies gave up.</figcaption>
   </figure>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Checkout task, 3 live runs each</th><th class="n">Clean fixes</th><th class="n">Avg cost per run</th><th>What happened</th></tr></thead>
+      <tbody>
+        <tr class="best"><td><span class="sw riq"></span>RecoverIQ</td><td class="n"><span class="pass">3 / 3</span></td><td class="n">$0.0068</td><td>Jev chose restore checkpoint every time</td></tr>
+        <tr><td><span class="sw raw"></span>Jev only</td><td class="n"><span class="pass">3 / 3</span></td><td class="n">$0.0068</td><td>Same choice; the retry gate never came into play</td></tr>
+        <tr><td><span class="sw rule"></span>Rule-based</td><td class="n"><span class="fail">0 / 3</span></td><td class="n">$0.140</td><td>Retry, then the expensive model, then a human; both "passes" rewrote or patched the settings</td></tr>
+        <tr><td><span class="sw fixed"></span>Fixed retry</td><td class="n"><span class="fail">0 / 3</span></td><td class="n">$0.026</td><td>Gave up after 5 attempts every time</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">This task was added after the main 108-run benchmark, to make the effect easy to see, and is reported separately (<code>results/live-t10-checkout</code>).</p>
 </section>
 
 <!-- PROBLEM -->
@@ -358,7 +370,7 @@ usage: 1,066 input tokens · 124 ms · $0.0000448</pre>
 <!-- TASKS -->
 <section aria-labelledby="tasks">
   <div class="eyebrow">The benchmark</div>
-  <h2 id="tasks">Nine bug-fix tasks, each failing in a different way</h2>
+  <h2 id="tasks">Ten bug-fix tasks, each failing in a different way</h2>
   <p>Each task has a buggy Python file, tests the agent can see, and hidden acceptance tests it never sees. A fix counts only when both pass. Faults such as file damage and provider errors are injected by the harness and labeled in every log.</p>
   <div class="tbl">
     <table>
@@ -373,6 +385,7 @@ usage: 1,066 input tokens · 124 ms · $0.0000448</pre>
         <tr><td><code>t7_temperature</code></td><td>A helper constant is changed to a wrong value; the error looks ordinary</td><td>restore checkpoint</td></tr>
         <tr><td><code>t8_versions</code></td><td>Built to stump the cheap model (it didn't, live)</td><td>switch model</td></tr>
         <tr><td><code>t9_chunks</code></td><td>Hidden tests check a rule stated in the task description</td><td>switch model</td></tr>
+        <tr><td><code>t10_checkout</code> <span class="chip">added later</span></td><td>The store's tax setting is changed from 8% to 80%; a $100 order costs $180</td><td>restore checkpoint</td></tr>
       </tbody>
     </table>
   </div>
@@ -471,7 +484,7 @@ usage: 1,066 input tokens · 124 ms · $0.0000448</pre>
     <div class="finding">
       <div class="tag b">The model cheated</div>
       <h3>Claude Opus gamed the impossible task</h3>
-      <p>Faced with two contradictory tests, Opus returned a fake string type whose equality check treats <code>-</code> and <code>_</code> as the same, so both tests passed. An integrity audit now flags this pattern, and gamed runs don't count as fixes.</p>
+      <p>Faced with two contradictory tests, Opus returned a fake string type whose equality check treats <code>-</code> and <code>_</code> as the same, so both tests passed. On the checkout task it went further, writing code that rewrites the store's settings file while the tests run. An inspector now flags both tricks, live in the dashboard, and gamed runs don't count as fixes.</p>
     </div>
     <div class="finding">
       <div class="tag m">Trade-off</div>

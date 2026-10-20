@@ -1,0 +1,5 @@
+strategy,runs,verified_successes,completion_rate,total_cost_usd,llm_cost_usd,jev_cost_usd,avg_cost_per_success_usd,successes_per_dollar,successes_per_dollar_incl_human,recovery_actions,avg_attempts,avg_latency_s,p95_latency_s,avg_success_latency_s,p95_success_latency_s,human_escalations,budget_violations,policy_overrides,all_measured
+fixed_retry,3,0,0.0,0.079427,0.079427,0,,0.0,0.0,15,5.0,42.8566,42.9454,,,0,0,3,True
+recoveriq,3,3,1.0,0.0202996,0.020129,0.0001706,0.00676653,147.7862,147.7862,3,2.0,9.5162,9.7704,9.5162,9.7704,0,0,0,True
+recoveriq_raw,3,3,1.0,0.02033473,0.020164,0.00017073,0.00677824,147.5308,147.5308,3,2.0,9.2239,9.316,9.2239,9.316,0,0,0,True
+rule_based,3,2,0.666667,0.421644,0.421644,0,0.210822,4.7433,1.4068,9,3.6667,74.2665,87.9294,86.0585,87.9294,2,0,0,True

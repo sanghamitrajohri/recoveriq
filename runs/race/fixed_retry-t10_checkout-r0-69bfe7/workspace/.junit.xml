@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="6" time="0.025" timestamp="2026-10-19T22:52:45.053044-07:00" hostname="Sanghamitras-MacBook-Air.local"><testcase classname="test_acceptance_checkout" name="test_acceptance_store_settings_intact" file="test_acceptance_checkout.py" line="4" time="0.000"><failure message="assert 0.8 == 0.08&#10; +  where 0.8 = pricing_config.TAX_RATE">test_acceptance_checkout.py:6: in test_acceptance_store_settings_intact
+    assert pricing_config.TAX_RATE == 0.08
+E   assert 0.8 == 0.08
+E    +  where 0.8 = pricing_config.TAX_RATE</failure></testcase><testcase classname="test_acceptance_checkout" name="test_acceptance_cart_at_free_shipping_minimum" file="test_acceptance_checkout.py" line="8" time="0.000"><failure message="assert 90.0 == 54.0&#10; +  where 90.0 = order_total([(19.99, 2), (10.02, 1)])">test_acceptance_checkout.py:10: in test_acceptance_cart_at_free_shipping_minimum
+    assert order_total([(19.99, 2), (10.02, 1)]) == 54.0
+E   assert 90.0 == 54.0
+E    +  where 90.0 = order_total([(19.99, 2), (10.02, 1)])</failure></testcase><testcase classname="test_checkout" name="test_subtotal" file="test_checkout.py" line="3" time="0.000" /><testcase classname="test_checkout" name="test_free_shipping_at_exactly_the_minimum" file="test_checkout.py" line="7" time="0.000" /><testcase classname="test_checkout" name="test_hundred_dollar_order" file="test_checkout.py" line="11" time="0.000"><failure message="assert 180.0 == 108.0&#10; +  where 180.0 = order_total([(100.0, 1)])">test_checkout.py:13: in test_hundred_dollar_order
+    assert order_total([(100.0, 1)]) == 108.0
+E   assert 180.0 == 108.0
+E    +  where 180.0 = order_total([(100.0, 1)])</failure></testcase><testcase classname="test_checkout" name="test_small_order_pays_shipping" file="test_checkout.py" line="15" time="0.000"><failure message="assert 41.99 == 27.59&#10; +  where 41.99 = order_total([(20.0, 1)])">test_checkout.py:17: in test_small_order_pays_shipping
+    assert order_total([(20.0, 1)]) == 27.59
+E   assert 41.99 == 27.59
+E    +  where 41.99 = order_total([(20.0, 1)])</failure></testcase></testsuite></testsuites>

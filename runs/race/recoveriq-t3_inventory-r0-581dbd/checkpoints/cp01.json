@@ -1,0 +1,12 @@
+{
+  "checkpoint_id": "cp01",
+  "label": "after attempt 2",
+  "known_good": true,
+  "created_at": 1792475634.245075,
+  "passed_tests": 4,
+  "manifest": {
+    "inventory.py": "5919820e45656ed961808a3a8ab2fee2107f9558e686511eda2064ddf0ad5121",
+    "test_acceptance_inventory.py": "b7e4b51c62c0fe9aa79d1f52729d9e77e7a906391cba9ff7751bd273ef81a720",
+    "test_inventory.py": "25a095489ffd2dd88f15ba89cb64fb42b0099e83bb7000fe89ba6f61158e0831"
+  }
+}

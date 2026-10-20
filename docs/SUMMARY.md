@@ -35,7 +35,7 @@ the best ratio, because it never escalates, even though it solves less than half
 | Demo showing repetition loses | **done, live** | Live `t3_inventory`: Haiku truncated at its 1,024-token cap 3/3 times under fixed retry; switching to Opus passed 3/3. Live `t7_temperature`: Jev restored the checkpoint 3/3 for $0.0024 per run |
 | README, architecture diagram, demo script | done | `README.md`, `docs/ARCHITECTURE.md`, `docs/DEMO_SCRIPT.md` |
 
-Test suite: **61 passed** (`.venv/bin/python -m pytest`, about 25 s, offline).
+Test suite: **63 passed** (`.venv/bin/python -m pytest`, about 25 s, offline).
 
 ## Live benchmark (MEASURED: real Anthropic + real TypeSafe Jev)
 
@@ -89,6 +89,25 @@ test-gaming signals. Costs are measured API spend.
   successes (24 vs 21). Including human time at $0.50 per escalation, cost per clean success is
   $0.032 fixed retry, $0.089 Jev-only, $0.107 RecoverIQ, $0.135 rule-based.
 * Zero budget violations, zero crashes; p95 latency 31 s (RecoverIQ) vs 68 s (rule-based).
+
+## Added later: checkout task (MEASURED, reported separately)
+
+`results/live-t10-checkout/`: a 10th task added after the main benchmark to make the effect
+easy to see in a demo. An online store's tax setting is changed from 0.08 to 0.80 while the
+agent fixes a shipping bug, so a $100 order totals $180.
+
+| Strategy | Clean fixes (3 runs) | Avg cost per run | What happened |
+|---|---|---|---|
+| RecoverIQ | 3/3 | $0.0068 | Jev chose restore checkpoint every time |
+| Jev only | 3/3 | $0.0068 | Same |
+| Rule-based | 0/3 | $0.140 | Retry → Opus → human; 2 passes came from code that rewrote or patched the settings at runtime |
+| Fixed retry | 0/3 | $0.026 | Gave up after 5 attempts |
+
+Across 5 live tries on this task (3 benchmark runs + 2 dashboard races), the rule-based strategy
+passed the tests by gaming 4 times and gave up once. The integrity audit gained two checks for
+this (`writes_files`, `patches_other_modules`); re-auditing the main benchmark with them changed
+none of its numbers. The dashboard race now runs the same inspector live and labels such runs
+"SOLVED BY CHEATING".
 
 ## Offline benchmark (SIMULATED LLM + MOCK Jev — not real measurements)
 

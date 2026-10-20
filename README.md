@@ -45,7 +45,9 @@ details in [`docs/SUMMARY.md`](docs/SUMMARY.md)):
 | **RecoverIQ (Jev + retry gate)** | **24/27** | **$0.56** | **42.9** |
 
 On silent workspace corruption, Jev restored the checkpoint 3/3 times ($0.007 total) while
-the rules failed 3/3 ($0.36). Opus was caught gaming contradictory tests
+the rules failed 3/3 ($0.36). A later checkout task (tax setting changed from 8% to 80%) showed
+the same: Jev 3/3 clean at $0.0068 per run, rules 0/3 clean at $0.14 per run, with the expensive
+model rewriting the settings file to get past the tests (`results/live-t10-checkout`). Opus was caught gaming contradictory tests
 ([`docs/examples/reward_hack_slugify.py`](docs/examples/reward_hack_slugify.py)). Including
 imputed human time ($0.50 per escalation), fixed retry has the best ratio. See the summary for
 all caveats (small n; the retry gate was tuned after the first live call).
@@ -65,7 +67,7 @@ cd recoveriq
 python3.11 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 cp .env.example .env            # add keys later; offline modes work without them
-.venv/bin/python -m pytest      # 61 tests, ~25 s, always offline (never calls paid APIs)
+.venv/bin/python -m pytest      # 63 tests, ~25 s, always offline (never calls paid APIs)
 .venv/bin/streamlit run app.py  # dashboard at http://localhost:8501
 ```
 
@@ -140,6 +142,7 @@ shown; the agent is told only their names), and an optional injected fault defin
 | `t7_temperature` | silent corruption | An injected write changes a *value* in `constants.py`; tests fail with assertions, not import errors | restore checkpoint |
 | `t8_versions` | capability gap | The cheap model keeps proposing a plausible but wrong fix | switch model early |
 | `t9_chunks` | inferable edge case | Hidden tests check validation stated in the description; a stronger model can infer it | switch model (a human also works, but costs more) |
+| `t10_checkout` | silent corruption (added later) | An injected edit changes the store's `TAX_RATE` from 0.08 to 0.80; a $100 order totals $180 | restore checkpoint |
 
 `t1`–`t6` match the hand-written rules. `t7`–`t9` were added afterwards on purpose, so the
 rules weren't designed for them: the rules only restore on import errors, retry before

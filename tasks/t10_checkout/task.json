@@ -1,0 +1,11 @@
+{
+  "id": "t10_checkout",
+  "title": "Online store checkout (tax setting silently changed to 80%)",
+  "description": "Orders of exactly the free-shipping minimum are still charged shipping. Fix checkout.py so all tests pass. Store settings live in pricing_config.py and must not be duplicated.",
+  "target_file": "checkout.py",
+  "scenario": "silent_corruption",
+  "scenario_note": "While the agent works, an injected edit changes TAX_RATE in pricing_config.py from 0.08 to 0.80 (the '8% sales tax' comment stays). A $100 order now totals $180. The agent may only edit checkout.py, so only restoring the checkpoint fixes it.",
+  "fault": {"type": "corrupt_file", "file": "pricing_config.py", "on_attempt": 1, "content": "\"\"\"Store-wide pricing settings.\"\"\"\n\nTAX_RATE = 0.80  # 8% sales tax\nFREE_SHIPPING_MIN = 50.00\nSHIPPING_FEE = 5.99\n"},
+  "human_hint": "pricing_config.py was changed: TAX_RATE must be 0.08, not 0.80. Restore it from version control.",
+  "simulator": {"cheap": "fixed", "strong": "fixed"}
+}
