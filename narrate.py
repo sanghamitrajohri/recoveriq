@@ -230,8 +230,16 @@ def styled(style: str, text: str) -> str:
     return c(text, *_STYLE[style])
 
 
-def printer(prefix: str = ""):
-    """Return an ``on_item(run, item)`` callback for ``RecoveryRun.run`` that prints each step live."""
+NO_PATCH = {"llm_error", "output_truncated", "malformed_output"}  # attempts whose code is never applied
+
+
+def printer(prefix: str = "", show_code: bool = False):
+    """Return an ``on_item(run, item)`` callback for ``RecoveryRun.run`` that prints each step live.
+
+    With ``show_code``, each attempt also prints the lines the AI changed and a running clock and bill."""
+    import time
+    t0 = time.perf_counter()
+
     def on_item(run, item: dict) -> None:
         state = None
         if item["kind"] == "jev":
@@ -239,4 +247,19 @@ def printer(prefix: str = ""):
             state = seen[-1] if seen else None
         for style, text in describe(item, state):
             print(f"{prefix}{c(text, *_STYLE[style])}", flush=True)
+        if show_code and item["kind"] == "attempt" and item["status"] in NO_PATCH:
+            print(f"{prefix}   {c('no new code was applied this attempt', 'dim')}", flush=True)
+            print(f"{prefix}   {c(f'[clock {time.perf_counter() - t0:.0f}s · spent so far ${run.rc.tracker.spent_usd:.4f}]', 'bold')}",
+                  flush=True)
+        elif show_code and item["kind"] == "attempt":
+            changed = [ln for ln in agent_change(run.rc.task, run.rc.workspace).splitlines()[2:]
+                       if ln[:1] in "+-"]
+            if changed:
+                print(f"{prefix}   the AI's code change:", flush=True)
+                for ln in changed[:6]:
+                    print(f"{prefix}     {c(ln, 'red' if ln.startswith('-') else 'green')}", flush=True)
+            elif item.get("total"):
+                print(f"{prefix}   {c('the AI left the code unchanged', 'dim')}", flush=True)
+            print(f"{prefix}   {c(f'[clock {time.perf_counter() - t0:.0f}s · spent so far ${run.rc.tracker.spent_usd:.4f}]', 'bold')}",
+                  flush=True)
     return on_item

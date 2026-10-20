@@ -28,6 +28,11 @@ LABELS = {"recoveriq": "RecoverIQ (Jev + gate)", "recoveriq_raw": "Jev only (no 
 SHORT = {"recoveriq": "RecoverIQ", "recoveriq_raw": "Jev only", "rule_based": "Rule-based", "fixed_retry": "Fixed retry"}
 
 
+def wait(enabled: bool, prompt: str) -> None:
+    if enabled:
+        input("\n" + c(prompt + "⏎", "yellow"))
+
+
 def rule(title: str) -> None:
     print("\n" + c(f"━━━ {title} " + "━" * max(3, 72 - len(title)), "bold"), flush=True)
 
@@ -35,7 +40,9 @@ def rule(title: str) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--task", default="t10_checkout")
-    ap.add_argument("--strategies", default="fixed_retry,rule_based,recoveriq")
+    ap.add_argument("--strategies", default="fixed_retry,recoveriq",
+                    help="comma list; add rule_based for the hand-written rules")
+    ap.add_argument("--pause", action="store_true", help="wait for Enter between sections (for presenting)")
     ap.add_argument("--interactive", action="store_true")
     args = ap.parse_args()
     settings, task, budget = Settings(), Task.load(args.task), Budget()
@@ -52,6 +59,7 @@ def main() -> None:
     print(f"  Job: {task.description}")
     print(f"  The agent may only edit: {c(task.target_file, 'bold')}")
 
+    wait(args.pause, "Press Enter to show the buggy code ")
     rule(f"The buggy code: {task.target_file}")
     for style, text in code_listing(task):
         print("  " + c(text, *({"bad": ("red", "bold"), "dim": ("dim",)}.get(style, ()))))
@@ -66,6 +74,7 @@ def main() -> None:
     print("  2. We run pytest in a sandbox: no network, no API keys, only this workspace")
     print("  3. If tests fail, a strategy picks one of five moves; a budget policy in plain code can veto it")
 
+    wait(args.pause, "Press Enter to show what goes wrong mid-run ")
     rule("What goes wrong mid-run")
     diff = sabotage_diff(task)
     if diff:
@@ -78,8 +87,10 @@ def main() -> None:
     print("  After each failure there are five moves: " + " | ".join(ACTION_PLAIN.values()))
 
     rows, outcome = [], {}
-    for name in args.strategies.split(","):
-        rule(f"Strategy: {LABELS.get(name, name)}")
+    for i, name in enumerate(args.strategies.split(",")):
+        uses_jev = name.startswith("recoveriq")
+        wait(args.pause, f"Press Enter to run {'WITH' if uses_jev else 'WITHOUT'} Jev: {LABELS.get(name, name)} ")
+        rule(f"PART {i + 1}: {'WITH' if uses_jev else 'WITHOUT'} Jev · {LABELS.get(name, name)}")
         run = RecoveryRun(task, make_strategy(name, settings.jev_mode, settings.jev_model), settings, budget,
                           run_root=RUNS_DIR / "demo")
 
@@ -91,7 +102,7 @@ def main() -> None:
             return _task.human_hint
 
         t0 = time.perf_counter()
-        state = run.run(human=human, on_item=printer("  "))
+        state = run.run(human=human, on_item=printer("  ", show_code=True))
         secs, spent = time.perf_counter() - t0, run.rc.tracker.spent_usd
         ok = state.get("status") == "success"
         check = audit(task, run.rc.workspace) if ok else None
@@ -109,6 +120,8 @@ def main() -> None:
                 style = "red" if line.startswith("-") else "green" if line.startswith("+") else "dim"
                 print("    " + c(line, style))
         print("  " + verdict)
+        print("  " + c(f"TOTAL {'WITH' if uses_jev else 'WITHOUT'} JEV: {state.get('attempt', 0)} attempts · "
+                       f"{secs:.0f} seconds · ${spent:.4f}", "bold"))
         if ok:
             print(c("  inspector: " + ("nothing gamed or damaged" if check["clean"] else "flagged, does not count"),
                     "dim"))
@@ -130,6 +143,7 @@ def main() -> None:
         best = min(winners, key=lambda r: r[4])
         print("\n  " + c(f"Cheapest clean fix: {LABELS.get(best[0], best[0])} at ${best[4]:.4f}", "green", "bold"))
 
+    wait(args.pause, "Press Enter for the with-vs-without-Jev comparison ")
     print_jev_comparison(task, outcome)
 
 
