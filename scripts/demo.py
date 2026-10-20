@@ -19,7 +19,8 @@ from benchmark import provenance  # noqa: E402
 from config import RUNS_DIR, Budget, Settings  # noqa: E402
 from engine import RecoveryRun, console_human, scripted_human  # noqa: E402
 from integrity import audit  # noqa: E402
-from narrate import ACTION_PLAIN, c, printer, sabotage_diff  # noqa: E402
+from narrate import (ACTION_PLAIN, agent_change, c, code_listing, hidden_test_count, printer,  # noqa: E402
+                     sabotage_diff, visible_tests)  # noqa: E402
 from strategies import make_strategy  # noqa: E402
 
 LABELS = {"recoveriq": "RecoverIQ (Jev + gate)", "recoveriq_raw": "Jev only (no gate)",
@@ -48,6 +49,22 @@ def main() -> None:
     print(f"  {task.title}")
     print(f"  Job: {task.description}")
     print(f"  The agent may only edit: {c(task.target_file, 'bold')}")
+
+    rule(f"The buggy code: {task.target_file}")
+    for style, text in code_listing(task):
+        print("  " + c(text, *({"bad": ("red", "bold"), "dim": ("dim",)}.get(style, ()))))
+    rule("The tests it must pass")
+    for line in visible_tests(task):
+        print("  " + c(line, "dim" if line.startswith("#") else "cyan"))
+    print(f"  + {hidden_test_count(task)} hidden tests the agent never sees (a fix counts only if those pass too)")
+
+    rule("What runs on every attempt")
+    print("  1. Claude gets the task, the code and the last test output, and returns a new "
+          f"{task.target_file}")
+    print("  2. We run pytest in a sandbox: no network, no API keys, only this workspace")
+    print("  3. If tests fail, a strategy picks one of five moves; a budget policy in plain code can veto it")
+
+    rule("What goes wrong mid-run")
     diff = sabotage_diff(task)
     if diff:
         print(c("  The sabotage, injected after attempt 1:", "yellow"))
@@ -83,6 +100,12 @@ def main() -> None:
             verdict = c(f"⚠️  TESTS PASSED BY CHEATING ({flags}) in {secs:.0f}s for ${spent:.4f}", "yellow", "bold")
         else:
             verdict = c(f"❌ NO FIX ({state.get('status')}) after {secs:.0f}s, ${spent:.4f}", "red", "bold")
+        change = agent_change(task, run.rc.workspace)
+        if change:
+            print(c(f"  What the AI changed in {task.target_file}:", "bold"))
+            for line in change.splitlines()[:30]:
+                style = "red" if line.startswith("-") else "green" if line.startswith("+") else "dim"
+                print("    " + c(line, style))
         print("  " + verdict)
         if ok:
             print(c("  inspector: " + ("nothing gamed or damaged" if check["clean"] else "flagged, does not count"),

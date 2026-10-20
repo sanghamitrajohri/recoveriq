@@ -46,6 +46,53 @@ def sabotage_diff(task) -> str | None:
         f"{fault['file']} (correct)", f"{fault['file']} (after the sabotage)", lineterm="", n=1))
 
 
+def bug_lines(task) -> set[int]:
+    """1-based lines of the target file that differ from the task's reference fix (simulator/fixed.py)."""
+    ref = task.dir / "simulator" / "fixed.py"
+    if not ref.exists():
+        return set()
+    src = (task.dir / "workspace" / task.target_file).read_text().splitlines()
+    sm = difflib.SequenceMatcher(None, src, ref.read_text().splitlines())
+    return {i + 1 for tag, i1, i2, _, _ in sm.get_opcodes() if tag != "equal" for i in range(i1, max(i2, i1 + 1))}
+
+
+def code_listing(task, max_lines: int = 30) -> list[tuple[str, str]]:
+    """The buggy target file with line numbers; long files are cut to the lines around the bug."""
+    src = (task.dir / "workspace" / task.target_file).read_text().splitlines()
+    bugs = bug_lines(task)
+    keep = set(range(1, len(src) + 1)) if len(src) <= max_lines else {
+        n for b in bugs for n in range(b - 4, b + 5) if 1 <= n <= len(src)} or set(range(1, max_lines + 1))
+    out, last = [], 0
+    for n in sorted(keep):
+        if n != last + 1:
+            out.append(("dim", "      ..."))
+        mark = n in bugs
+        out.append(("bad" if mark else "", f"{n:>5}  {src[n - 1]}" + ("    <-- the bug" if mark else "")))
+        last = n
+    return out
+
+
+def visible_tests(task, max_lines: int = 24) -> list[str]:
+    lines: list[str] = []
+    for p in sorted((task.dir / "workspace").glob("test_*.py")):
+        lines += [f"# {p.name}"] + p.read_text().splitlines()
+    return [ln for ln in lines if ln.strip()][:max_lines]
+
+
+def hidden_test_count(task) -> int:
+    return sum(p.read_text().count("\ndef test_") + p.read_text().startswith("def test_")
+               for p in (task.dir / "acceptance").glob("*.py"))
+
+
+def agent_change(task, workspace) -> str:
+    """What the agent actually changed in the target file, as a unified diff."""
+    before = (task.dir / "workspace" / task.target_file).read_text().splitlines()
+    after_path = workspace / task.target_file
+    after = after_path.read_text().splitlines() if after_path.exists() else []
+    return "\n".join(difflib.unified_diff(before, after, f"{task.target_file} (buggy)",
+                                          f"{task.target_file} (after the AI's fix)", lineterm="", n=1))
+
+
 def describe(item: dict, jev_state: dict | None = None) -> list[tuple[str, str]]:
     """One trace item as (style, text) lines. Style is '', 'good', 'bad', 'jev', 'warn' or 'dim'."""
     kind, out = item["kind"], []
@@ -56,7 +103,17 @@ def describe(item: dict, jev_state: dict | None = None) -> list[tuple[str, str]]
                     f"ATTEMPT {item['attempt']} with {item['model']}: "
                     f"{STATUS_PLAIN.get(item['status'], item['status'])} ({counts}${item['cost_usd']:.4f})"))
         if not ok and item.get("summary"):
-            out.append(("dim", f"   test output: {item['summary'][:150]}"))
+            head, _, rest = item["summary"].partition(". ")
+            parts = rest.split(" | ") if rest else []
+            visible = [p for p in parts if not p.startswith("[acceptance]")]
+            hidden = len(parts) - len(visible)
+            if visible or hidden:
+                for p in visible[:2]:
+                    out.append(("dim", f"   failing test: {p[:150]}"))
+                if hidden:
+                    out.append(("dim", f"   + {hidden} hidden test(s) failed (details withheld from the agent)"))
+            else:
+                out.append(("dim", f"   output: {item['summary'][:150]}"))
         for f in item.get("injected_faults", []):
             kind_, _, what = f.partition(":")
             out.append(("warn", "   injected on purpose: "

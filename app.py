@@ -15,7 +15,7 @@ from benchmark import aggregate
 from config import RESULTS_DIR, RUNS_DIR, Budget, Settings
 from engine import RecoveryRun, scripted_human
 from integrity import audit
-from narrate import ACTION_PLAIN, SOURCE_PLAIN, STATUS_PLAIN, c, printer, sabotage_diff
+from narrate import ACTION_PLAIN, SOURCE_PLAIN, STATUS_PLAIN, bug_lines, c, printer, sabotage_diff
 from strategies import STRATEGY_NAMES, make_strategy
 
 st.set_page_config(page_title="RecoverIQ", page_icon="🛟", layout="wide")
@@ -385,6 +385,10 @@ with tab_race:
                "badges are LIVE (about $0.05–0.25 per race). Human escalations get the simulated reply.")
     with st.expander("🔍 What's broken here (so you can follow along)"):
         st.markdown(f"**The agent's job:** {task.description}  \n**Allowed to edit:** only `{task.target_file}`")
+        bugs = bug_lines(task)
+        st.markdown(f"**The buggy code** (`{task.target_file}`" + (f", bug on line {', '.join(map(str, sorted(bugs)))}"
+                    if bugs else "") + "):")
+        st.code((task.dir / "workspace" / task.target_file).read_text(), language="python", line_numbers=True)
         diff = sabotage_diff(task)
         if diff:
             st.markdown("**The sabotage, injected after the first attempt:**")
